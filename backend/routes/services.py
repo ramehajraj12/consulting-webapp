@@ -9,7 +9,7 @@ from routes.auth import get_current_user
 router = APIRouter(prefix="/services", tags=["Services"])
 
 # Get database connection
-from ..server import db
+from server import db
 
 
 @router.get("/", response_model=List[ServiceResponse])
