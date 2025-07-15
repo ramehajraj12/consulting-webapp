@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from ..models.project import Project, ProjectCreate, ProjectResponse, ProjectUpdate
-from ..models.user import User
-from ..routes.auth import get_current_user
+from models.project import Project, ProjectCreate, ProjectResponse, ProjectUpdate
+from models.user import User
+from routes.auth import get_current_user
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
