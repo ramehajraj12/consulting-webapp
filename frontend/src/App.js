@@ -99,6 +99,9 @@ function App() {
                       </ProtectedRoute>
                     } />
                     <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/payments" element={<PaymentsPage />} />
+                    <Route path="/payment/success" element={<PaymentSuccessPage />} />
+                    <Route path="/payment/cancel" element={<PaymentCancelPage />} />
                   </Routes>
                 </Layout>
               }
