@@ -44,6 +44,8 @@ const Layout = ({ children }) => {
       return '/client-dashboard';
     } else if (user?.role === 'consultant') {
       return '/consultant-dashboard';
+    } else if (user?.role === 'admin') {
+      return '/admin-dashboard';
     }
     return '/';
   };
