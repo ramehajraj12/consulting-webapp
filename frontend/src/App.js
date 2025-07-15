@@ -55,6 +55,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/training-management"
+              element={
+                <ProtectedRoute requiredRole="consultant">
+                  <TrainingManagementPage />
+                </ProtectedRoute>
+              }
+            />
             
             {/* Public Routes with Layout */}
             <Route
