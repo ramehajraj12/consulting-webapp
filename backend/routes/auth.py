@@ -72,6 +72,11 @@ async def login(credentials: dict):
             detail="Email ose fjalëkalim i gabuar"
         )
     
+    # Fix ObjectId handling
+    user_doc['id'] = str(user_doc.get('_id', user_doc.get('id')))
+    if '_id' in user_doc:
+        del user_doc['_id']
+    
     user = User(**user_doc)
     
     # Verify password
