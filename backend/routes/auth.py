@@ -4,9 +4,9 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import timedelta
 import os
 
-from ..models.user import User, UserCreate, UserResponse, UserUpdate
-from ..models.user import Consultant, ConsultantCreate, ConsultantResponse
-from ..utils.auth import verify_password, get_password_hash, create_access_token, decode_access_token
+from models.user import User, UserCreate, UserResponse, UserUpdate
+from models.user import Consultant, ConsultantCreate, ConsultantResponse
+from utils.auth import verify_password, get_password_hash, create_access_token, decode_access_token
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
