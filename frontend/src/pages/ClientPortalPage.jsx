@@ -593,7 +593,7 @@ const ClientPortalPage = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <Button className="w-full btn-primary">
+                      <Button className="w-full btn-primary" onClick={() => setShowChatDialog(true)}>
                         <MessageCircle className="h-4 w-4 mr-2" />
                         Fillo Chat
                       </Button>
@@ -601,7 +601,7 @@ const ClientPortalPage = () => {
                         <Calendar className="h-4 w-4 mr-2" />
                         Rezervo Konsultim
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowTicketDialog(true)}>
                         <FileText className="h-4 w-4 mr-2" />
                         Hap Ticket
                       </Button>
@@ -632,6 +632,44 @@ const ClientPortalPage = () => {
                   </CardContent>
                 </Card>
               </div>
+              
+              {/* Support Tickets */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="heading-4">Ticket-et e Mbështetjes</CardTitle>
+                  <CardDescription>Ticket-et tuaja të mbështetjes</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {supportTickets.map((ticket) => (
+                      <div key={ticket.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{ticket.subject}</h4>
+                          <Badge className={ticket.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                            {ticket.status === 'open' ? 'Hapur' : 'Mbyllur'}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{ticket.description}</p>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>Krijuar: {ticket.created_at}</span>
+                          <Badge variant="outline">{ticket.priority}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {supportTickets.length === 0 && (
+                      <div className="text-center py-8">
+                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 mb-4">Nuk keni ticket-e mbështetje</p>
+                        <Button onClick={() => setShowTicketDialog(true)} className="btn-primary">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Hap Ticket të parë
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
