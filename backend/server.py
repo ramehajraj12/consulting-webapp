@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 
 # Import routes
-from .routes import auth, services, consultations, projects, dashboard
+from routes import auth, services, consultations, projects, dashboard
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
