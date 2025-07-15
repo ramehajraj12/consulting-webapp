@@ -491,6 +491,63 @@ const ClientPortalPage = () => {
               )}
             </TabsContent>
 
+            {/* Documents Tab */}
+            <TabsContent value="documents" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="heading-4">Dokumentet e mia</h3>
+                  <p className="text-gray-600">Menaxhoni dokumentet tuaja</p>
+                </div>
+                <Button onClick={() => setShowUploadDialog(true)} className="btn-primary">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Ngarko Dokument
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {documents.map((doc) => (
+                  <Card key={doc.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <File className="h-5 w-5 text-blue-600" />
+                          <CardTitle className="text-sm">{doc.name}</CardTitle>
+                        </div>
+                        <Badge variant="outline">{doc.type}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600 mb-3">{doc.description}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{doc.upload_date}</span>
+                        <span>{doc.size}</span>
+                      </div>
+                      <div className="flex space-x-2 mt-3">
+                        <Button variant="outline" size="sm" className="flex-1">
+                          <Download className="h-4 w-4 mr-1" />
+                          Shkarko
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              {documents.length === 0 && (
+                <div className="text-center py-12">
+                  <File className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">Nuk keni ngarkuar dokumente ende</p>
+                  <Button onClick={() => setShowUploadDialog(true)} className="btn-primary">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Ngarko Dokumentin e parë
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+
             {/* Notifications Tab */}
             <TabsContent value="notifications" className="space-y-6">
               <Card>
