@@ -36,6 +36,27 @@ const ClientPortalPage = () => {
   const [consultations, setConsultations] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Document upload state
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadDescription, setUploadDescription] = useState('');
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  
+  // Chat state
+  const [showChatDialog, setShowChatDialog] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+  
+  // Support ticket state
+  const [showTicketDialog, setShowTicketDialog] = useState(false);
+  const [ticketSubject, setTicketSubject] = useState('');
+  const [ticketDescription, setTicketDescription] = useState('');
+  const [ticketPriority, setTicketPriority] = useState('medium');
+  const [submittingTicket, setSubmittingTicket] = useState(false);
+  const [supportTickets, setSupportTickets] = useState([]);
 
   useEffect(() => {
     fetchData();
