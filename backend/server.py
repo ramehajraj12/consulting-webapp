@@ -80,4 +80,5 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    # Database connection is handled in database.py
+    pass
