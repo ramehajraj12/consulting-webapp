@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -20,10 +20,15 @@ import {
   Euro
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { mockConsultants, mockServices } from '../data/mock';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import api from '../services/api';
 
 const ConsultationPage = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [services, setServices] = useState([]);
+  const [consultants, setConsultants] = useState([]);
   const [selectedService, setSelectedService] = useState('');
   const [selectedConsultant, setSelectedConsultant] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
@@ -37,12 +42,59 @@ const ConsultationPage = () => {
     projectDescription: '',
     urgency: ''
   });
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const timeSlots = [
     '09:00', '10:00', '11:00', '12:00', 
     '14:00', '15:00', '16:00', '17:00'
   ];
+
+  useEffect(() => {
+    fetchData();
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        company: user.company || ''
+      }));
+    }
+  }, [user]);
+
+  const fetchData = async () => {
+    try {
+      const servicesResponse = await api.get('/services');
+      setServices(servicesResponse.data);
+      
+      // Mock consultants data - in real app, this would come from API
+      setConsultants([
+        {
+          id: 'consultant_1',
+          name: 'Dr. Alba Hasani',
+          specialization: 'Statistika mjekësore',
+          rating: 4.9
+        },
+        {
+          id: 'consultant_2',
+          name: 'Prof. Marin Kodra',
+          specialization: 'Metodologji kërkimi',
+          rating: 4.8
+        },
+        {
+          id: 'consultant_3',
+          name: 'Dr. Ines Brahimi',
+          specialization: 'Statistika biznesore',
+          rating: 4.7
+        }
+      ]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -51,14 +103,73 @@ const ConsultationPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mock submission
-    toast({
-      title: "Rezervimi u dërgua me sukses!",
-      description: "Do të ju kontaktojmë brenda 24 orëve për konfirmim.",
-    });
+    
+    if (!selectedService || !selectedConsultant || !selectedDate || !selectedTime) {
+      toast({
+        title: "Informacion i mangët",
+        description: "Ju lutemi plotësoni të gjitha fushat e kërkuara.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const consultationData = {
+        consultant_id: selectedConsultant,
+        service_id: selectedService,
+        consultation_type: consultationType || 'online',
+        date: new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 
+                       parseInt(selectedTime.split(':')[0]), parseInt(selectedTime.split(':')[1])).toISOString(),
+        duration: 60,
+        project_description: formData.projectDescription,
+        urgency: formData.urgency
+      };
+
+      await api.post('/consultations', consultationData);
+      
+      toast({
+        title: "Rezervimi u krye me sukses!",
+        description: "Do të ju kontaktojmë brenda 24 orëve për konfirmim.",
+      });
+
+      // Reset form
+      setSelectedService('');
+      setSelectedConsultant('');
+      setSelectedDate(null);
+      setSelectedTime('');
+      setConsultationType('');
+      setFormData({
+        ...formData,
+        projectDescription: '',
+        urgency: ''
+      });
+
+    } catch (error) {
+      const errorMessage = error.response?.data?.detail || 'Gabim në rezervim';
+      toast({
+        title: "Gabim në rezervim",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Duke ngarkuar...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -151,8 +262,8 @@ const ConsultationPage = () => {
                           <SelectValue placeholder="Zgjidhni shërbimin" />
                         </SelectTrigger>
                         <SelectContent>
-                          {mockServices.map((service) => (
-                            <SelectItem key={service.id} value={service.id.toString()}>
+                          {services.map((service) => (
+                            <SelectItem key={service.id} value={service.id}>
                               {service.title}
                             </SelectItem>
                           ))}
@@ -183,8 +294,8 @@ const ConsultationPage = () => {
                           <SelectValue placeholder="Zgjidhni konsulentin" />
                         </SelectTrigger>
                         <SelectContent>
-                          {mockConsultants.map((consultant) => (
-                            <SelectItem key={consultant.id} value={consultant.id.toString()}>
+                          {consultants.map((consultant) => (
+                            <SelectItem key={consultant.id} value={consultant.id}>
                               {consultant.name} - {consultant.specialization}
                             </SelectItem>
                           ))}
@@ -211,6 +322,7 @@ const ConsultationPage = () => {
                             selected={selectedDate}
                             onSelect={setSelectedDate}
                             initialFocus
+                            disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
                           />
                         </PopoverContent>
                       </Popover>
@@ -262,8 +374,12 @@ const ConsultationPage = () => {
                       </Select>
                     </div>
 
-                    <Button type="submit" className="w-full btn-primary">
-                      Rezervo Konsultim
+                    <Button 
+                      type="submit" 
+                      className="w-full btn-primary"
+                      disabled={submitting}
+                    >
+                      {submitting ? 'Po rezervon...' : 'Rezervo Konsultim'}
                     </Button>
                   </form>
                 </CardContent>
@@ -346,7 +462,7 @@ const ConsultationPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockConsultants.map((consultant) => (
+                    {consultants.map((consultant) => (
                       <div key={consultant.id} className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                           <Users className="h-5 w-5 text-blue-600" />
