@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Users, CheckCircle, XCircle, Clock, BarChart3, BookOpen, MessageCircle } from 'lucide-react';
-import ChatManagement from './ChatManagement';
+import ChatManagement from '../admin/ChatManagement';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({});
