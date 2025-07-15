@@ -21,7 +21,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ.get('DB_NAME', 'spss_academy')]
 
 # Password hash for 'password123' (for testing purposes)
-PASSWORD_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"
+PASSWORD_HASH = "$2b$12$sLZ0vjsV0beKA16so9arqur4sb1BRJktYZ69NDQv1hSlERMKe17FW"
 
 async def seed_services():
     """Seed services data"""
