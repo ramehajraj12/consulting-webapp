@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -18,72 +18,63 @@ import {
   AlertCircle,
   Upload
 } from 'lucide-react';
-import { mockProjects } from '../data/mock';
+import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 
 const ClientPortalPage = () => {
-  const [selectedProject, setSelectedProject] = useState(null);
+  const { user } = useAuth();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [consultations, setConsultations] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const notifications = [
-    {
-      id: 1,
-      type: 'success',
-      message: 'Projekti "Analiza të Dhënave Kërkimore" u përfundua me sukses.',
-      time: '2 orë më parë',
-      read: false
-    },
-    {
-      id: 2,
-      type: 'info',
-      message: 'Ju keni një konsultim të programuar për nesër në orën 14:00.',
-      time: '1 ditë më parë',
-      read: true
-    },
-    {
-      id: 3,
-      type: 'warning',
-      message: 'Ju lutemi ngarkoni të dhënat për projektin "Studim Epidemiologjik".',
-      time: '3 ditë më parë',
-      read: false
-    }
-  ];
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const recentFiles = [
-    {
-      id: 1,
-      name: 'Analiza_Finale_Dataset.pdf',
-      type: 'PDF',
-      size: '2.4 MB',
-      uploaded: '2024-01-15',
-      project: 'Analiza të Dhënave Kërkimore'
-    },
-    {
-      id: 2,
-      name: 'SPSS_Output_Results.spv',
-      type: 'SPSS',
-      size: '1.8 MB',
-      uploaded: '2024-01-14',
-      project: 'Studim Epidemiologjik'
-    },
-    {
-      id: 3,
-      name: 'Interpretimi_Statistikor.docx',
-      type: 'DOC',
-      size: '890 KB',
-      uploaded: '2024-01-12',
-      project: 'Analiza Tregut'
+  const fetchData = async () => {
+    try {
+      const [dashboardRes, projectsRes, consultationsRes] = await Promise.all([
+        api.get('/dashboard/client'),
+        api.get('/projects'),
+        api.get('/consultations')
+      ]);
+
+      setDashboardData(dashboardRes.data);
+      setProjects(projectsRes.data);
+      setConsultations(consultationsRes.data);
+      setNotifications(dashboardRes.data.notifications || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Përfunduar':
+      case 'completed':
         return 'bg-green-100 text-green-800';
-      case 'Në progres':
+      case 'in-progress':
         return 'bg-blue-100 text-blue-800';
-      case 'Filluar':
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'Përfunduar';
+      case 'in-progress':
+        return 'Në progres';
+      case 'pending':
+        return 'Në pritje';
+      default:
+        return status;
     }
   };
 
@@ -91,14 +82,29 @@ const ClientPortalPage = () => {
     switch (type) {
       case 'success':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'warning':
-        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
       case 'info':
         return <Bell className="h-4 w-4 text-blue-500" />;
+      case 'warning':
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
       default:
         return <Bell className="h-4 w-4 text-gray-500" />;
     }
   };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('sq-AL');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Duke ngarkuar dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -107,7 +113,7 @@ const ClientPortalPage = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="heading-2 mb-2">Mirë se erdhët, Dr. Fatmir Leshi</h1>
+              <h1 className="heading-2 mb-2">Mirë se erdhët, {user?.name}</h1>
               <p className="body-medium text-gray-600">
                 Menaxhoni projektet tuaja dhe ndiqni progresin në një vend.
               </p>
@@ -132,7 +138,7 @@ const ClientPortalPage = () => {
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="projects">Projektet</TabsTrigger>
-              <TabsTrigger value="files">Dokumentet</TabsTrigger>
+              <TabsTrigger value="consultations">Konsultime</TabsTrigger>
               <TabsTrigger value="notifications">Njoftimet</TabsTrigger>
               <TabsTrigger value="support">Mbështetje</TabsTrigger>
             </TabsList>
@@ -145,8 +151,8 @@ const ClientPortalPage = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="body-small text-gray-600">Projekte Aktive</p>
-                        <p className="heading-3">2</p>
+                        <p className="body-small text-gray-600">Projekte Totale</p>
+                        <p className="heading-3">{dashboardData?.stats?.total_projects || 0}</p>
                       </div>
                       <BarChart3 className="h-8 w-8 text-blue-600" />
                     </div>
@@ -157,10 +163,22 @@ const ClientPortalPage = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="body-small text-gray-600">Projekte të Përfunduara</p>
-                        <p className="heading-3">1</p>
+                        <p className="body-small text-gray-600">Projekte Aktive</p>
+                        <p className="heading-3 text-green-600">{dashboardData?.stats?.active_projects || 0}</p>
                       </div>
-                      <CheckCircle className="h-8 w-8 text-green-600" />
+                      <Clock className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="body-small text-gray-600">Projekte të Përfunduara</p>
+                        <p className="heading-3 text-emerald-600">{dashboardData?.stats?.completed_projects || 0}</p>
+                      </div>
+                      <CheckCircle className="h-8 w-8 text-emerald-600" />
                     </div>
                   </CardContent>
                 </Card>
@@ -170,21 +188,9 @@ const ClientPortalPage = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="body-small text-gray-600">Konsultime</p>
-                        <p className="heading-3">5</p>
+                        <p className="heading-3 text-purple-600">{dashboardData?.stats?.consultations || 0}</p>
                       </div>
                       <MessageCircle className="h-8 w-8 text-purple-600" />
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="body-small text-gray-600">Dokumentet</p>
-                        <p className="heading-3">12</p>
-                      </div>
-                      <FileText className="h-8 w-8 text-orange-600" />
                     </div>
                   </CardContent>
                 </Card>
@@ -198,21 +204,28 @@ const ClientPortalPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockProjects.map((project) => (
-                      <div key={project.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="font-medium mb-1">{project.title}</h4>
-                          <p className="body-small text-gray-600">{project.client}</p>
+                    {dashboardData?.recent_projects?.length > 0 ? (
+                      dashboardData.recent_projects.map((project) => (
+                        <div key={project.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <h4 className="font-medium mb-1">{project.title}</h4>
+                            <p className="body-small text-gray-600">{project.consultant_name}</p>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <Badge className={getStatusColor(project.status)}>
+                              {getStatusText(project.status)}
+                            </Badge>
+                            <Progress value={project.progress} className="w-24" />
+                            <span className="body-small text-gray-600">{project.progress}%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                          <Badge className={getStatusColor(project.status)}>
-                            {project.status}
-                          </Badge>
-                          <Progress value={project.progress} className="w-24" />
-                          <span className="body-small text-gray-600">{project.progress}%</span>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="body-medium text-gray-600">Nuk keni projekte aktualisht</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -221,16 +234,16 @@ const ClientPortalPage = () => {
             {/* Projects Tab */}
             <TabsContent value="projects" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {mockProjects.map((project) => (
+                {projects.map((project) => (
                   <Card key={project.id} className="hover-scale cursor-pointer">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle className="heading-4">{project.title}</CardTitle>
                         <Badge className={getStatusColor(project.status)}>
-                          {project.status}
+                          {getStatusText(project.status)}
                         </Badge>
                       </div>
-                      <CardDescription>{project.client}</CardDescription>
+                      <CardDescription>{project.consultant_name}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -245,7 +258,9 @@ const ClientPortalPage = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-4 w-4 text-gray-500" />
-                            <span className="body-small text-gray-600">Afati: {project.deadline}</span>
+                            <span className="body-small text-gray-600">
+                              Afati: {project.deadline ? formatDate(project.deadline) : 'Pa afat'}
+                            </span>
                           </div>
                           <Badge variant="outline">{project.type}</Badge>
                         </div>
@@ -265,43 +280,74 @@ const ClientPortalPage = () => {
                   </Card>
                 ))}
               </div>
+              
+              {projects.length === 0 && (
+                <div className="text-center py-12">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="body-medium text-gray-600">Nuk keni projekte aktualisht</p>
+                </div>
+              )}
             </TabsContent>
 
-            {/* Files Tab */}
-            <TabsContent value="files" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="heading-4">Dokumentet e Fundit</CardTitle>
-                  <CardDescription>Dokumentet e ngarkuara dhe të shkarkuara</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentFiles.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <FileText className="h-5 w-5 text-blue-600" />
+            {/* Consultations Tab */}
+            <TabsContent value="consultations" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {consultations.map((consultation) => (
+                  <Card key={consultation.id} className="hover-scale">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="heading-4">{consultation.service_title}</CardTitle>
+                        <Badge className={getStatusColor(consultation.status)}>
+                          {getStatusText(consultation.status)}
+                        </Badge>
+                      </div>
+                      <CardDescription>{consultation.consultant_name}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-1">
+                            <Calendar className="h-4 w-4 text-gray-500" />
+                            <span className="body-small text-gray-600">
+                              {formatDate(consultation.date)}
+                            </span>
                           </div>
-                          <div>
-                            <h4 className="font-medium">{file.name}</h4>
-                            <p className="body-small text-gray-600">{file.project}</p>
+                          <div className="flex items-center space-x-1">
+                            <Clock className="h-4 w-4 text-gray-500" />
+                            <span className="body-small text-gray-600">
+                              {consultation.duration} min
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="body-small text-gray-600">{file.size}</p>
-                            <p className="body-small text-gray-500">{file.uploaded}</p>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Shkarko
+                        
+                        {consultation.notes && (
+                          <p className="body-small text-gray-600 italic">
+                            "{consultation.notes}"
+                          </p>
+                        )}
+                        
+                        <div className="flex space-x-2">
+                          <Button variant="outline" className="flex-1">
+                            Detaje
                           </Button>
+                          {consultation.status === 'confirmed' && (
+                            <Button className="flex-1 btn-primary">
+                              Bashkohu
+                            </Button>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              {consultations.length === 0 && (
+                <div className="text-center py-12">
+                  <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="body-medium text-gray-600">Nuk keni konsultime të rezervuara</p>
+                </div>
+              )}
             </TabsContent>
 
             {/* Notifications Tab */}
@@ -319,7 +365,7 @@ const ClientPortalPage = () => {
                           {getNotificationIcon(notification.type)}
                           <div className="flex-1">
                             <p className="body-medium">{notification.message}</p>
-                            <p className="body-small text-gray-500 mt-1">{notification.time}</p>
+                            <p className="body-small text-gray-500 mt-1">{notification.time_ago}</p>
                           </div>
                           {!notification.read && (
                             <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
@@ -327,6 +373,13 @@ const ClientPortalPage = () => {
                         </div>
                       </div>
                     ))}
+                    
+                    {notifications.length === 0 && (
+                      <div className="text-center py-8">
+                        <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="body-medium text-gray-600">Nuk keni njoftime të reja</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
