@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -14,21 +14,80 @@ import {
   Filter,
   ArrowRight
 } from 'lucide-react';
-import { mockBlogPosts } from '../data/mock';
+import api from '../services/api';
 
 const BlogPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Mock blog posts since we don't have a blog API yet
+  const mockBlogPosts = [
+    {
+      id: 1,
+      title: "Si të Zgjidhni Testin e Duhur Statistikor",
+      excerpt: "Udhëzues i plotë për zgjedhjen e testeve statistikore të përshtatshme për të dhënat tuaja.",
+      author: "Dr. Alba Hasani",
+      date: "2024-01-15",
+      category: "Tutorial",
+      readTime: "8 min"
+    },
+    {
+      id: 2,
+      title: "Gabimet më të Shpeshta në Analizën Statistikore",
+      excerpt: "Identifikimi dhe shmangja e gabimeve të zakonshme në analizën e të dhënave.",
+      author: "Prof. Marin Kodra",
+      date: "2024-01-12",
+      category: "Best Practices",
+      readTime: "6 min"
+    },
+    {
+      id: 3,
+      title: "Interpretimi i Rezultateve të Regresionit",
+      excerpt: "Mënyra e duhur për të interpretuar dhe raportuar rezultatet e analizës regresive.",
+      author: "Dr. Ines Brahimi",
+      date: "2024-01-10",
+      category: "Tutorial",
+      readTime: "10 min"
+    },
+    {
+      id: 4,
+      title: "SPSS vs R: Cili është më i mirë për ju?",
+      excerpt: "Krahasim i detajuar mes SPSS dhe R për analiza statistikore.",
+      author: "Dr. Alba Hasani",
+      date: "2024-01-08",
+      category: "Comparison",
+      readTime: "12 min"
+    },
+    {
+      id: 5,
+      title: "Përgatitja e të Dhënave për Analizë",
+      excerpt: "Hapat kryesorë për të përgatitur të dhënat tuaja për analizë statistikore.",
+      author: "Prof. Marin Kodra",
+      date: "2024-01-05",
+      category: "Tutorial",
+      readTime: "9 min"
+    }
+  ];
 
   const categories = [
     { id: 'all', label: 'Të gjitha', count: mockBlogPosts.length },
-    { id: 'tutorial', label: 'Tutorial', count: 2 },
+    { id: 'tutorial', label: 'Tutorial', count: 3 },
     { id: 'best-practices', label: 'Best Practices', count: 1 },
-    { id: 'case-study', label: 'Case Study', count: 0 },
+    { id: 'comparison', label: 'Krahasime', count: 1 },
     { id: 'news', label: 'Lajme', count: 0 }
   ];
 
-  const filteredPosts = mockBlogPosts.filter(post => {
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      setPosts(mockBlogPosts);
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || 
@@ -36,7 +95,26 @@ const BlogPage = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const featuredPost = mockBlogPosts[0];
+  const featuredPost = posts[0];
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('sq-AL', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Duke ngarkuar artikujt...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -104,14 +182,14 @@ const BlogPage = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockBlogPosts.slice(0, 3).map((post) => (
+                      {posts.slice(0, 3).map((post) => (
                         <div key={post.id} className="space-y-2">
-                          <h4 className="body-medium font-medium line-clamp-2">
+                          <h4 className="body-medium font-medium line-clamp-2 hover:text-blue-600 cursor-pointer">
                             {post.title}
                           </h4>
                           <div className="flex items-center space-x-2 text-gray-500">
                             <Calendar className="h-3 w-3" />
-                            <span className="body-small">{post.date}</span>
+                            <span className="body-small">{formatDate(post.date)}</span>
                           </div>
                         </div>
                       ))}
@@ -142,48 +220,50 @@ const BlogPage = () => {
             {/* Main Content */}
             <div className="lg:col-span-3">
               {/* Featured Post */}
-              <Card className="mb-8">
-                <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                  <BookOpen className="h-12 w-12 text-blue-600" />
-                </div>
-                <CardHeader>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Badge variant="default">I Zgjedhur</Badge>
-                    <Badge variant="outline">{featuredPost.category}</Badge>
+              {featuredPost && (
+                <Card className="mb-8">
+                  <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                    <BookOpen className="h-12 w-12 text-blue-600" />
                   </div>
-                  <CardTitle className="heading-2">{featuredPost.title}</CardTitle>
-                  <CardDescription className="body-large">
-                    {featuredPost.excerpt}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
-                        <User className="h-4 w-4 text-gray-500" />
-                        <span className="body-small text-gray-600">{featuredPost.author}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <span className="body-small text-gray-600">{featuredPost.date}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                        <span className="body-small text-gray-600">{featuredPost.readTime}</span>
-                      </div>
+                  <CardHeader>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Badge variant="default">I Zgjedhur</Badge>
+                      <Badge variant="outline">{featuredPost.category}</Badge>
                     </div>
-                    <Button className="btn-primary">
-                      Lexo Më Shumë
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    <CardTitle className="heading-2">{featuredPost.title}</CardTitle>
+                    <CardDescription className="body-large">
+                      {featuredPost.excerpt}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-1">
+                          <User className="h-4 w-4 text-gray-500" />
+                          <span className="body-small text-gray-600">{featuredPost.author}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <span className="body-small text-gray-600">{formatDate(featuredPost.date)}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-4 w-4 text-gray-500" />
+                          <span className="body-small text-gray-600">{featuredPost.readTime}</span>
+                        </div>
+                      </div>
+                      <Button className="btn-primary">
+                        Lexo Më Shumë
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Blog Posts Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {filteredPosts.map((post) => (
-                  <Card key={post.id} className="hover-scale">
+                {filteredPosts.slice(1).map((post) => (
+                  <Card key={post.id} className="hover-scale cursor-pointer">
                     <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
                       <BookOpen className="h-8 w-8 text-blue-600" />
                     </div>
@@ -191,7 +271,9 @@ const BlogPage = () => {
                       <div className="flex items-center space-x-2 mb-2">
                         <Badge variant="outline">{post.category}</Badge>
                       </div>
-                      <CardTitle className="heading-4">{post.title}</CardTitle>
+                      <CardTitle className="heading-4 hover:text-blue-600 transition-colors">
+                        {post.title}
+                      </CardTitle>
                       <CardDescription className="body-medium">
                         {post.excerpt}
                       </CardDescription>
@@ -208,11 +290,9 @@ const BlogPage = () => {
                             <span className="body-small text-gray-600">{post.readTime}</span>
                           </div>
                         </div>
-                        <Link to={`/blog/${post.id}`}>
-                          <Button variant="outline" size="sm">
-                            Lexo
-                          </Button>
-                        </Link>
+                        <Button variant="outline" size="sm">
+                          Lexo
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
