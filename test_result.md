@@ -289,6 +289,8 @@ Përdoruesi kërkoi implementimin e një sistemi admin për SPSS Academy me kët
 
 ## agent_communication:
     - agent: "main"
-      message: "Implementuar sistemi admin i plotë me aprovim përdoruesish, dashboard dhe kufizime aksesi. Gati për testim backend."
+      message: "Implementuar sistemi admin i plotë me aprovim përdoruesish, dashboard dhe kufizime aksesi. Backend testimi 16/16 i suksesshëm."
+    - agent: "main"
+      message: "Rregulluar environment variable problem në frontend AdminDashboard. Aplikacioni tani punon pa gabime. Gati për testim frontend nëse kërkohet."
     - agent: "testing"
       message: "✅ BACKEND TESTING COMPLETED SUCCESSFULLY: All 16 admin system tests passed. Admin authentication, authorization, user approval system, and access restrictions working perfectly. Key findings: 1) Admin can access all admin endpoints and create services/training 2) Non-admin users correctly blocked from admin functions 3) User approval system prevents unapproved users from logging in 4) Dashboard statistics working with all required fields. System ready for production."
