@@ -11,7 +11,7 @@ from utils.auth import get_time_ago
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 # Get database connection
-from ..server import db
+from server import db
 
 
 @router.get("/client", response_model=Dict[str, Any])
