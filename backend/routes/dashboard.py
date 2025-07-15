@@ -3,10 +3,10 @@ from typing import List, Dict, Any
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import datetime, timedelta
 
-from ..models.user import User
-from ..models.notification import Notification, NotificationResponse
-from ..routes.auth import get_current_user
-from ..utils.auth import get_time_ago
+from models.user import User
+from models.notification import Notification, NotificationResponse
+from routes.auth import get_current_user
+from utils.auth import get_time_ago
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
