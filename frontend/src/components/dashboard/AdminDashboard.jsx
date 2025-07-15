@@ -126,144 +126,204 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard Admin</h1>
-        <Button onClick={fetchDashboardData} variant="outline">
-          Përfreskoni të dhënat
-        </Button>
-      </div>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Përmbledhje</TabsTrigger>
+          <TabsTrigger value="users">Përdorues</TabsTrigger>
+          <TabsTrigger value="chat">Mesazhet</TabsTrigger>
+          <TabsTrigger value="analytics">Analitikat</TabsTrigger>
+        </TabsList>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Përdorues</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total_users || 0}</div>
-          </CardContent>
-        </Card>
+        <TabsContent value="overview" className="space-y-6">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-800">Dashboard Admin</h1>
+            <Button onClick={fetchDashboardData} variant="outline">
+              Përfreskoni të dhënat
+            </Button>
+          </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Në pritje aprovimi</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending_users || 0}</div>
-          </CardContent>
-        </Card>
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Përdorues</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total_users || 0}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Përdorues Aktivë</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.active_users || 0}</div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Në pritje aprovimi</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-yellow-600">{stats.pending_users || 0}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Shërbime</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total_services || 0}</div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Përdorues Aktivë</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.active_users || 0}</div>
+              </CardContent>
+            </Card>
 
-      {/* Pending Users */}
-      {pendingUsers.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Përdorues që presin aprovim</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {pendingUsers.map((user) => (
-                <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{user.name}</h3>
-                    <p className="text-sm text-gray-600">{user.email}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary">{user.role}</Badge>
-                      {user.company && <span className="text-sm text-gray-500">{user.company}</span>}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Shërbime</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total_services || 0}</div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6">
+          {/* Pending Users */}
+          {pendingUsers.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Përdorues që presin aprovim</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {pendingUsers.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{user.name}</h3>
+                        <p className="text-sm text-gray-600">{user.email}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="secondary">{user.role}</Badge>
+                          {user.company && <span className="text-sm text-gray-500">{user.company}</span>}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleUserApproval(user.id, true)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Aprovo
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleUserApproval(user.id, false)}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Refuzo
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* All Users Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Menaxhimi i Përdoruesve</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {allUsers.map((user) => (
+                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{user.name}</h3>
+                      <p className="text-sm text-gray-600">{user.email}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary">{user.role}</Badge>
+                        {user.is_approved ? (
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            Aprovuar
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive">Në pritje</Badge>
+                        )}
+                        {user.is_active ? (
+                          <Badge variant="default" className="bg-blue-100 text-blue-800">
+                            Aktiv
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">Joaktiv</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toggleUserStatus(user.id)}
+                      >
+                        {user.is_active ? 'Çaktivizon' : 'Aktivizoi'}
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleUserApproval(user.id, true)}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Aprovo
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleUserApproval(user.id, false)}
-                    >
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Refuzo
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* All Users Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Menaxhimi i Përdoruesve</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {allUsers.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1">
-                  <h3 className="font-semibold">{user.name}</h3>
-                  <p className="text-sm text-gray-600">{user.email}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary">{user.role}</Badge>
-                    {user.is_approved ? (
-                      <Badge variant="default" className="bg-green-100 text-green-800">
-                        Aprovuar
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive">Në pritje</Badge>
-                    )}
-                    {user.is_active ? (
-                      <Badge variant="default" className="bg-blue-100 text-blue-800">
-                        Aktiv
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">Joaktiv</Badge>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => toggleUserStatus(user.id)}
-                  >
-                    {user.is_active ? 'Çaktivizon' : 'Aktivizoi'}
-                  </Button>
-                </div>
+                ))}
               </div>
-            ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="chat" className="space-y-6">
+          <ChatManagement />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Statistika të Përgjithshme</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span>Total Trajnime:</span>
+                    <span className="font-bold">{stats.total_trainings || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Konsultime:</span>
+                    <span className="font-bold">{stats.total_consultations || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Klientë:</span>
+                    <span className="font-bold">{stats.clients || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Konsulentë:</span>
+                    <span className="font-bold">{stats.consultants || 0}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Aktiviteti i Fundit</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">Registrimet e fundit</p>
+                  <p className="text-sm text-gray-600">Projektet e reja</p>
+                  <p className="text-sm text-gray-600">Konsultime të rezervuara</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
