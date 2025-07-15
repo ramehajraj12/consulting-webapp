@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from ..models.service import Service, ServiceCreate, ServiceResponse, ServiceUpdate
-from ..models.user import User
-from ..routes.auth import get_current_user
+from models.service import Service, ServiceCreate, ServiceResponse, ServiceUpdate
+from models.user import User
+from routes.auth import get_current_user
 
 router = APIRouter(prefix="/services", tags=["Services"])
 
