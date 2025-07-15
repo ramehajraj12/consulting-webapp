@@ -129,7 +129,7 @@ const Layout = ({ children }) => {
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <BarChart3 className="h-8 w-8 text-blue-400" />
-                <span className="heading-4 font-bold">SPSS Analytics</span>
+                <span className="heading-4 font-bold">SPSS Academy</span>
               </div>
               <p className="body-small text-gray-300">
                 Platformë profesionale për konsulencë statistikore në SPSS dhe trajnime të specializuara.
