@@ -12,7 +12,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
 
 # Get database connection
-from server import db
+from database import db
 
 
 @router.post("/register", response_model=dict)
