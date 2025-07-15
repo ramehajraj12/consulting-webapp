@@ -263,7 +263,7 @@ const ClientPortalPage = () => {
                 <Settings className="h-4 w-4 mr-2" />
                 Cilësimet
               </Button>
-              <Button className="btn-primary">
+              <Button className="btn-primary" onClick={() => setShowUploadDialog(true)}>
                 <Upload className="h-4 w-4 mr-2" />
                 Ngarko Dokument
               </Button>
