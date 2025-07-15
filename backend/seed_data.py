@@ -108,6 +108,21 @@ async def seed_users():
     """Seed users data"""
     users = [
         {
+            "_id": "admin_1",
+            "email": "admin@spssacademy.com",
+            "password_hash": PASSWORD_HASH,
+            "role": "admin",
+            "name": "Admin SPSS Academy",
+            "phone": "+355 69 000 0000",
+            "company": "SPSS Academy",
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
+            "is_active": True,
+            "is_approved": True,
+            "approved_by": "system",
+            "approved_at": datetime.utcnow()
+        },
+        {
             "_id": "consultant_1",
             "email": "alba.hasani@spssacademy.al",
             "password_hash": PASSWORD_HASH,
@@ -117,7 +132,10 @@ async def seed_users():
             "company": "SPSS Academy",
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
-            "is_active": True
+            "is_active": True,
+            "is_approved": True,
+            "approved_by": "admin_1",
+            "approved_at": datetime.utcnow()
         },
         {
             "_id": "consultant_2",
@@ -129,7 +147,10 @@ async def seed_users():
             "company": "SPSS Academy",
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
-            "is_active": True
+            "is_active": True,
+            "is_approved": True,
+            "approved_by": "admin_1",
+            "approved_at": datetime.utcnow()
         },
         {
             "_id": "consultant_3",
@@ -141,7 +162,10 @@ async def seed_users():
             "company": "SPSS Academy",
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
-            "is_active": True
+            "is_active": True,
+            "is_approved": True,
+            "approved_by": "admin_1",
+            "approved_at": datetime.utcnow()
         },
         {
             "_id": "client_1",
@@ -153,7 +177,10 @@ async def seed_users():
             "company": "QSUT",
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
-            "is_active": True
+            "is_active": True,
+            "is_approved": True,
+            "approved_by": "admin_1",
+            "approved_at": datetime.utcnow()
         },
         {
             "_id": "client_2",
@@ -165,7 +192,10 @@ async def seed_users():
             "company": "Universiteti i Tiranës",
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
-            "is_active": True
+            "is_active": True,
+            "is_approved": True,
+            "approved_by": "admin_1",
+            "approved_at": datetime.utcnow()
         }
     ]
     
