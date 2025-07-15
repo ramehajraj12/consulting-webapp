@@ -116,11 +116,14 @@ Përdoruesi kërkoi implementimin e një sistemi admin për SPSS Academy me kët
     file: "backend/routes/admin.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "Krijuar sistemi admin me ruta për aprovim përdoruesish, statistika dashboard dhe menaxhim përdoruesish"
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Admin system working perfectly. All admin endpoints (/admin/pending-users, /admin/all-users, /admin/dashboard-stats) accessible only by admin users. Non-admin users correctly blocked with 403 Forbidden."
 
   - task: "Modifikimi i modelit User për aprovim"
     implemented: true
@@ -128,11 +131,14 @@ Përdoruesi kërkoi implementimin e një sistemi admin për SPSS Academy me kët
     file: "backend/models/user.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "Shtuar fushat is_approved, approved_by, approved_at në modelin User"
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: User approval system working correctly. New users registered with pending status (is_approved=false). Unapproved users blocked from login with 403 status."
 
   - task: "Përditësimi i auth system për aprovim"
     implemented: true
@@ -140,11 +146,14 @@ Përdoruesi kërkoi implementimin e një sistemi admin për SPSS Academy me kët
     file: "backend/routes/auth.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "Modifikuar login dhe registration për të mbështetur sistemin e aprovimit"
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Authentication system working perfectly. Admin auto-approved on registration. Client/consultant registration creates pending status. Login blocked for unapproved users."
 
   - task: "Kufizimi i aksesit për shërbime dhe trajnime"
     implemented: true
@@ -152,11 +161,14 @@ Përdoruesi kërkoi implementimin e një sistemi admin për SPSS Academy me kët
     file: "backend/routes/services.py, backend/routes/training.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "Kufizuar krijimin e shërbimeve dhe trajnimeve vetëm për admin"
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Access restrictions working perfectly. Only admin can create services (POST /api/services/) and training programs (POST /api/training/). Clients and consultants correctly blocked with 403 Forbidden."
 
   - task: "Shtimi i admin account në seed data"
     implemented: true
@@ -169,6 +181,9 @@ Përdoruesi kërkoi implementimin e një sistemi admin për SPSS Academy me kët
         - working: true
           agent: "main"
           comment: "Shtuar admin account: admin@spssacademy.com / password123"
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Admin account working correctly. Login successful with admin role. All test accounts (admin, client, consultant) functioning properly."
 
 ## frontend:
   - task: "Krijimi i AdminDashboard component"
