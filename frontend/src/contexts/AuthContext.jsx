@@ -52,6 +52,8 @@ export const AuthProvider = ({ children }) => {
         navigate('/client-dashboard');
       } else if (userData.role === 'consultant') {
         navigate('/consultant-dashboard');
+      } else if (userData.role === 'admin') {
+        navigate('/admin-dashboard');
       } else {
         navigate('/');
       }
