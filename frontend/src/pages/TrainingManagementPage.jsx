@@ -276,7 +276,7 @@ const TrainingManagementPage = () => {
 
       {/* Create/Edit Form Modal */}
       <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingProgram ? 'Ndrysho Program Trajnimi' : 'Krijo Program të Ri'}
@@ -286,7 +286,8 @@ const TrainingManagementPage = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="title">Titulli</Label>
@@ -297,7 +298,118 @@ const TrainingManagementPage = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="p.sh. SPSS për Fillestarë"
+                  className="text-sm"
                 />
+              </div>
+              <div>
+                <Label htmlFor="level">Niveli</Label>
+                <Select value={formData.level} onValueChange={(value) => setFormData({...formData, level: value})}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Zgjidhni nivelin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {levels.map(level => (
+                      <SelectItem key={level} value={level} className="text-sm">{level}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="duration">Kohëzgjatja</Label>
+                <Input
+                  id="duration"
+                  name="duration"
+                  value={formData.duration}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="p.sh. 4 javë"
+                  className="text-sm"
+                />
+              </div>
+              <div>
+                <Label htmlFor="price">Çmimi (€)</Label>
+                <Input
+                  id="price"
+                  name="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="100.00"
+                  className="text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="description">Përshkrimi</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                required
+                placeholder="Përshkrimi i programit të trajnimit..."
+                className="text-sm h-20"
+              />
+            </div>
+
+            {/* Modules Section */}
+            <div>
+              <Label>Modulet (një për rresht)</Label>
+              <Textarea
+                value={formData.modules.join('\n')}
+                onChange={(e) => setFormData({...formData, modules: e.target.value.split('\n').filter(m => m.trim())})}
+                placeholder="Moduli 1: Hyrje në SPSS&#10;Moduli 2: Analiza deskriptive&#10;Moduli 3: Teste statistikore"
+                className="text-sm h-20"
+              />
+            </div>
+
+            {/* Video URLs Section */}
+            <div>
+              <Label>URL të Videove (një për rresht)</Label>
+              <Textarea
+                value={formData.video_urls.join('\n')}
+                onChange={(e) => setFormData({...formData, video_urls: e.target.value.split('\n').filter(u => u.trim())})}
+                placeholder="https://youtube.com/watch?v=...&#10;https://vimeo.com/..."
+                className="text-sm h-20"
+              />
+            </div>
+
+            {/* Materials Section */}
+            <div>
+              <Label>Materialet (një për rresht)</Label>
+              <Textarea
+                value={formData.materials.join('\n')}
+                onChange={(e) => setFormData({...formData, materials: e.target.value.split('\n').filter(m => m.trim())})}
+                placeholder="Udhëzues PDF&#10;Ushtrime praktike&#10;Template SPSS"
+                className="text-sm h-20"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowCreateForm(false)}
+                className="text-sm"
+              >
+                Anulo
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="btn-primary text-sm"
+              >
+                {loading ? 'Duke ruajtur...' : (editingProgram ? 'Përditëso' : 'Krijo')}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
               </div>
               <div>
                 <Label htmlFor="level">Niveli</Label>
