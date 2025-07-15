@@ -50,6 +50,9 @@ class UserResponse(BaseModel):
     company: Optional[str] = None
     created_at: datetime
     is_active: bool
+    is_approved: bool
+    approved_by: Optional[str] = None
+    approved_at: Optional[datetime] = None
 
 
 class Consultant(BaseModel):
