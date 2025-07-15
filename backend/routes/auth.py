@@ -54,13 +54,22 @@ async def register(user_data: UserCreate):
 
 
 @router.post("/login", response_model=dict)
-async def login(email: str, password: str):
+async def login(credentials: dict):
+    email = credentials.get("email")
+    password = credentials.get("password")
+    
+    if not email or not password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email and password are required"
+        )
+    
     # Find user by email
     user_doc = await db.users.find_one({"email": email})
     if not user_doc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
+            detail="Email ose fjalëkalim i gabuar"
         )
     
     user = User(**user_doc)
@@ -69,7 +78,7 @@ async def login(email: str, password: str):
     if not verify_password(password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
+            detail="Email ose fjalëkalim i gabuar"
         )
     
     # Create access token
