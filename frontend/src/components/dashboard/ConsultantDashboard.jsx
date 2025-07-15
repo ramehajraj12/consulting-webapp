@@ -107,6 +107,12 @@ const ConsultantDashboard = () => {
               </p>
             </div>
             <div className="flex space-x-4">
+              <Link to="/training-management">
+                <Button variant="outline">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Menaxho Trajnimet
+                </Button>
+              </Link>
               <Link to="/services">
                 <Button variant="outline">
                   <Plus className="h-4 w-4 mr-2" />
