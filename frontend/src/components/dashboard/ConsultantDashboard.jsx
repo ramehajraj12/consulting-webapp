@@ -17,7 +17,8 @@ import {
   Euro,
   Users,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
