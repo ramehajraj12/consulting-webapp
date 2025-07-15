@@ -13,7 +13,7 @@ from datetime import datetime
 from database import db
 
 # Import routes
-from routes import auth, services, consultations, projects, dashboard
+from routes import auth, services, consultations, projects, dashboard, training
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
