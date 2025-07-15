@@ -25,6 +25,10 @@ async def register(user_data: UserCreate):
             detail="Email tashmë i regjistruar"
         )
     
+    # Auto-approve admin role, otherwise set to pending
+    is_approved = user_data.role == "admin"
+    current_time = datetime.utcnow()
+    
     # Create new user
     user = User(
         email=user_data.email,
@@ -32,7 +36,10 @@ async def register(user_data: UserCreate):
         role=user_data.role,
         name=user_data.name,
         phone=user_data.phone,
-        company=user_data.company
+        company=user_data.company,
+        is_approved=is_approved,
+        approved_by="system" if is_approved else None,
+        approved_at=current_time if is_approved else None
     )
     
     # Insert user into database
@@ -41,18 +48,24 @@ async def register(user_data: UserCreate):
     result = await db.users.insert_one(user_dict)
     user.id = str(result.inserted_id)
     
-    # Create access token
-    access_token_expires = timedelta(minutes=30)
-    access_token = create_access_token(
-        data={"sub": user.id, "role": user.role},
-        expires_delta=access_token_expires
-    )
-    
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": UserResponse(**user.dict())
-    }
+    # Only create token if user is approved
+    if is_approved:
+        access_token_expires = timedelta(minutes=30)
+        access_token = create_access_token(
+            data={"sub": user.id, "role": user.role},
+            expires_delta=access_token_expires
+        )
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": UserResponse(**user.dict())
+        }
+    else:
+        return {
+            "message": "Regjistrimi u krye me sukses! Presni aprovimin nga administratori.",
+            "user": UserResponse(**user.dict())
+        }
 
 
 @router.post("/login", response_model=dict)
