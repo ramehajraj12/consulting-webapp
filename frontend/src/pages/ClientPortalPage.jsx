@@ -674,6 +674,152 @@ const ClientPortalPage = () => {
           </Tabs>
         </div>
       </section>
+
+      {/* Upload Document Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ngarko Dokument</DialogTitle>
+            <DialogDescription>
+              Ngarkoni dokumentin tuaj dhe shtoni një përshkrim
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleFileUpload} className="space-y-4">
+            <div>
+              <Label htmlFor="file">Zgjidh Dokumentin</Label>
+              <Input
+                id="file"
+                type="file"
+                onChange={(e) => setUploadFile(e.target.files[0])}
+                required
+                accept=".pdf,.doc,.docx,.txt,.xlsx,.xls"
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">Përshkrimi</Label>
+              <Textarea
+                id="description"
+                value={uploadDescription}
+                onChange={(e) => setUploadDescription(e.target.value)}
+                placeholder="Përshkruani dokumentin..."
+                required
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setShowUploadDialog(false)}>
+                Anulo
+              </Button>
+              <Button type="submit" disabled={uploadingFile}>
+                {uploadingFile ? 'Duke ngarkuar...' : 'Ngarko'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Dialog */}
+      <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Chat me Ekspertët</DialogTitle>
+            <DialogDescription>
+              Bisedoni direkt me ekspertët tanë
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="h-64 overflow-y-auto border rounded-lg p-4 bg-gray-50">
+              {chatMessages.map((message, index) => (
+                <div key={index} className={`mb-3 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                  <div className={`inline-block p-3 rounded-lg max-w-xs ${
+                    message.sender === 'user' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-white text-gray-800'
+                  }`}>
+                    <p className="text-sm">{message.message}</p>
+                    <p className="text-xs opacity-75 mt-1">{message.timestamp}</p>
+                  </div>
+                </div>
+              ))}
+              
+              {chatMessages.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4" />
+                  <p>Nuk keni mesazhe ende. Filloni bisedën!</p>
+                </div>
+              )}
+            </div>
+            
+            <form onSubmit={handleSendMessage} className="flex space-x-2">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Shkruani mesazhin tuaj..."
+                className="flex-1"
+              />
+              <Button type="submit" disabled={sendingMessage}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Support Ticket Dialog */}
+      <Dialog open={showTicketDialog} onOpenChange={setShowTicketDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Hap Ticket Mbështetje</DialogTitle>
+            <DialogDescription>
+              Përshkruani problemin tuaj dhe ne do t'ju ndihmojmë
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitTicket} className="space-y-4">
+            <div>
+              <Label htmlFor="subject">Tema</Label>
+              <Input
+                id="subject"
+                value={ticketSubject}
+                onChange={(e) => setTicketSubject(e.target.value)}
+                placeholder="Tema e problemit..."
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="priority">Prioriteti</Label>
+              <select
+                id="priority"
+                value={ticketPriority}
+                onChange={(e) => setTicketPriority(e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="low">I ulët</option>
+                <option value="medium">I mesëm</option>
+                <option value="high">I lartë</option>
+                <option value="urgent">Urgjent</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="ticketDescription">Përshkrimi</Label>
+              <Textarea
+                id="ticketDescription"
+                value={ticketDescription}
+                onChange={(e) => setTicketDescription(e.target.value)}
+                placeholder="Përshkruani problemin në detaje..."
+                required
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setShowTicketDialog(false)}>
+                Anulo
+              </Button>
+              <Button type="submit" disabled={submittingTicket}>
+                {submittingTicket ? 'Duke dërguar...' : 'Dërgo Ticket'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
