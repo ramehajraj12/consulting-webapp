@@ -28,7 +28,7 @@ const HomePage = () => {
             <span className="text-blue-600">Analizën Statistikore</span>
           </h1>
           <p className="body-large text-gray-600 mb-8">
-            Platforma më e plotë për konsulencë statistikore në SPSS, trajnime të specializuara 
+            SPSS Academy është platforma më e plotë për konsulencë statistikore në SPSS, trajnime të specializuara 
             dhe mbështetje profesionale për projektet tuaja kërkimore.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
