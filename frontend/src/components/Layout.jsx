@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
             <Link to="/" className="flex items-center space-x-2">
               <BarChart3 className="h-8 w-8 text-blue-600" />
               <span className="heading-4 font-bold text-gray-900">
-                SPSS Analytics
+                SPSS Academy
               </span>
             </Link>
 
