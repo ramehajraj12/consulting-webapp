@@ -29,7 +29,11 @@ const ContactPage = () => {
     message: '',
     contactMethod: ''
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
+
+  const baseURL = process.env.REACT_APP_BACKEND_URL || import.meta.env.VITE_REACT_APP_BACKEND_URL;
 
   const handleInputChange = (e) => {
     setFormData({
