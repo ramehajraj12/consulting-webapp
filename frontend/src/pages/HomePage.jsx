@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -15,9 +15,85 @@ import {
   CheckCircle,
   ArrowRight
 } from 'lucide-react';
-import { mockServices, mockTrainingPrograms, mockTestimonials, mockStats } from '../data/mock';
+import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 
 const HomePage = () => {
+  const { user } = useAuth();
+  const [services, setServices] = useState([]);
+  const [trainingPrograms, setTrainingPrograms] = useState([]);
+  const [stats, setStats] = useState({
+    projectsCompleted: 0,
+    satisfiedClients: 0,
+    yearsExperience: 15,
+    trainedStudents: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [servicesRes, trainingRes] = await Promise.all([
+        api.get('/services'),
+        api.get('/training')
+      ]);
+
+      setServices(servicesRes.data);
+      setTrainingPrograms(trainingRes.data);
+      
+      // Calculate stats from real data
+      const totalStudents = trainingRes.data.reduce((sum, program) => sum + program.students, 0);
+      setStats(prev => ({
+        ...prev,
+        trainedStudents: totalStudents,
+        projectsCompleted: servicesRes.data.length * 50, // Mock calculation
+        satisfiedClients: Math.floor(totalStudents * 0.8)
+      }));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testimonials = [
+    {
+      id: 1,
+      name: "Dr. Fatmir Leshi",
+      title: "Drejtor i Kërkimit, QSUT",
+      text: "Shërbimi i shkëlqyer! Më ndihmuan të interpretoj rezultatet e studimit tim në mënyrë profesionale.",
+      rating: 5,
+    },
+    {
+      id: 2,
+      name: "Marina Tirana",
+      title: "Studente Doktorature",
+      text: "Kursi i SPSS-së më dha bazën e fortë që më duhej për të analizuar të dhënat e disertacionit.",
+      rating: 5,
+    },
+    {
+      id: 3,
+      name: "Ardit Hoxha",
+      title: "Menaxher i Kërkimeve",
+      text: "Konsulenca profesionale dhe e detajuar. Rekomandoj për çdo projekt kërkimor.",
+      rating: 5,
+    }
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Duke ngarkuar...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -32,7 +108,7 @@ const HomePage = () => {
             dhe mbështetje profesionale për projektet tuaja kërkimore.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/consultation">
+            <Link to={user ? "/consultation" : "/login"}>
               <Button className="btn-primary">
                 Rezervo Konsultim
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -52,19 +128,19 @@ const HomePage = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="heading-2 text-blue-600 mb-2">{mockStats.projectsCompleted}+</div>
+              <div className="heading-2 text-blue-600 mb-2">{stats.projectsCompleted}+</div>
               <p className="body-small text-gray-600">Projekte të Përfunduara</p>
             </div>
             <div className="text-center">
-              <div className="heading-2 text-blue-600 mb-2">{mockStats.satisfiedClients}+</div>
+              <div className="heading-2 text-blue-600 mb-2">{stats.satisfiedClients}+</div>
               <p className="body-small text-gray-600">Klientë të Kënaqur</p>
             </div>
             <div className="text-center">
-              <div className="heading-2 text-blue-600 mb-2">{mockStats.yearsExperience}+</div>
+              <div className="heading-2 text-blue-600 mb-2">{stats.yearsExperience}+</div>
               <p className="body-small text-gray-600">Vite Përvojë</p>
             </div>
             <div className="text-center">
-              <div className="heading-2 text-blue-600 mb-2">{mockStats.trainedStudents}+</div>
+              <div className="heading-2 text-blue-600 mb-2">{stats.trainedStudents}+</div>
               <p className="body-small text-gray-600">Studentë të Trajnuar</p>
             </div>
           </div>
@@ -82,7 +158,7 @@ const HomePage = () => {
           </div>
           
           <div className="scalefast-grid">
-            {mockServices.map((service) => {
+            {services.slice(0, 4).map((service) => {
               const IconComponent = {
                 BarChart3: BarChart3,
                 Users: Users,
@@ -100,7 +176,7 @@ const HomePage = () => {
                       <div>
                         <CardTitle className="heading-4">{service.title}</CardTitle>
                         <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="secondary">{service.price}</Badge>
+                          <Badge variant="secondary">{service.price_range}</Badge>
                           <Badge variant="outline">{service.duration}</Badge>
                         </div>
                       </div>
@@ -144,7 +220,7 @@ const HomePage = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {mockTrainingPrograms.slice(0, 3).map((program) => (
+            {trainingPrograms.slice(0, 3).map((program) => (
               <Card key={program.id} className="hover-scale">
                 <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
                   <BookOpen className="h-12 w-12 text-blue-600" />
@@ -168,7 +244,7 @@ const HomePage = () => {
                       <span className="body-small text-gray-600">{program.duration}</span>
                       <span className="body-small text-gray-600">{program.students} studentë</span>
                     </div>
-                    <span className="heading-4 text-blue-600">{program.price}</span>
+                    <span className="heading-4 text-blue-600">€{program.price}</span>
                   </div>
                   <Link to="/training">
                     <Button className="w-full btn-primary">
@@ -201,7 +277,7 @@ const HomePage = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {mockTestimonials.map((testimonial) => (
+            {testimonials.map((testimonial) => (
               <Card key={testimonial.id} className="hover-scale">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
@@ -237,7 +313,7 @@ const HomePage = () => {
             për nevojat tuaja në analizën statistikore.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/consultation">
+            <Link to={user ? "/consultation" : "/login"}>
               <Button className="bg-white text-blue-600 hover:bg-gray-50">
                 Filloni Tani
                 <ArrowRight className="ml-2 h-4 w-4" />
