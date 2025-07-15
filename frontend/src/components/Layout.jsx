@@ -31,6 +31,7 @@ const Layout = ({ children }) => {
     { path: '/services', label: 'Shërbimet', icon: null },
     { path: '/training', label: 'Trajnimet', icon: null },
     { path: '/blog', label: 'Blog', icon: null },
+    { path: '/payments', label: 'Çmimet', icon: null },
     { path: '/contact', label: 'Kontakt', icon: null }
   ];
 
