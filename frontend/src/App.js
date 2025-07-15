@@ -20,6 +20,7 @@ import ContactPage from "./pages/ContactPage";
 import ClientDashboardPage from "./pages/ClientDashboardPage";
 import ConsultantDashboardPage from "./pages/ConsultantDashboardPage";
 import TrainingManagementPage from "./pages/TrainingManagementPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 
 // Auth Components
 import LoginForm from "./components/auth/LoginForm";
