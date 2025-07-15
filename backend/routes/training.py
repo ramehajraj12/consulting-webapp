@@ -55,11 +55,11 @@ async def create_training_program(
     program_data: TrainingProgramCreate,
     current_user: User = Depends(get_current_user)
 ):
-    """Create new training program (consultant only)"""
-    if current_user.role != "consultant":
+    """Create new training program (admin only)"""
+    if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only consultants can create training programs"
+            detail="Vetëm administratorët mund të krijojnë trajnime të reja"
         )
     
     program = TrainingProgram(
