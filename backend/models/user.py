@@ -9,13 +9,16 @@ class User(BaseModel):
     id: Optional[str] = Field(default_factory=lambda: str(ObjectId()))
     email: EmailStr
     password_hash: str
-    role: str  # "client" or "consultant"
+    role: str  # "client", "consultant", or "admin"
     name: str
     phone: Optional[str] = None
     company: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     is_active: bool = True
+    is_approved: bool = False  # For approval system
+    approved_by: Optional[str] = None  # Admin who approved
+    approved_at: Optional[datetime] = None
 
     class Config:
         json_encoders = {
