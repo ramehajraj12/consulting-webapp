@@ -22,6 +22,11 @@ import ConsultantDashboardPage from "./pages/ConsultantDashboardPage";
 import TrainingManagementPage from "./pages/TrainingManagementPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 
+// Payment Pages
+import PaymentsPage from "./pages/PaymentsPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import PaymentCancelPage from "./pages/PaymentCancelPage";
+
 // Auth Components
 import LoginForm from "./components/auth/LoginForm";
 import RegisterForm from "./components/auth/RegisterForm";
