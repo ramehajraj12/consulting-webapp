@@ -92,7 +92,25 @@ const ClientPortalPage = () => {
       setDocuments(response.data);
     } catch (error) {
       console.error('Error fetching documents:', error);
-      setDocuments([]);
+      // Mock data for testing
+      setDocuments([
+        {
+          id: '1',
+          name: 'Projekt_Analiza.pdf',
+          description: 'Analiza e të dhënave për projekt',
+          type: 'pdf',
+          size: '2.5 MB',
+          upload_date: '2024-01-15'
+        },
+        {
+          id: '2',
+          name: 'Raport_Final.docx',
+          description: 'Raporti final i studimit',
+          type: 'docx',
+          size: '1.8 MB',
+          upload_date: '2024-01-14'
+        }
+      ]);
     }
   };
 
