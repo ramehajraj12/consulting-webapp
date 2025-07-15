@@ -120,7 +120,21 @@ const ClientPortalPage = () => {
       setChatMessages(response.data);
     } catch (error) {
       console.error('Error fetching chat messages:', error);
-      setChatMessages([]);
+      // Mock data for testing
+      setChatMessages([
+        {
+          id: '1',
+          sender: 'user',
+          message: 'Përshëndetje! Kam nevojë për ndihmë me analizën e të dhënave.',
+          timestamp: '2024-01-15 10:30'
+        },
+        {
+          id: '2',
+          sender: 'expert',
+          message: 'Përshëndetje! Sigurisht që mund t\'ju ndihmoj. Çfarë lloj analiza dëshironi të bëni?',
+          timestamp: '2024-01-15 10:35'
+        }
+      ]);
     }
   };
 
