@@ -74,10 +74,121 @@ const ClientPortalPage = () => {
       setProjects(projectsRes.data);
       setConsultations(consultationsRes.data);
       setNotifications(dashboardRes.data.notifications || []);
+      
+      // Fetch documents, chat messages, and support tickets
+      await fetchDocuments();
+      await fetchChatMessages();
+      await fetchSupportTickets();
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await api.get('/documents');
+      setDocuments(response.data);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      setDocuments([]);
+    }
+  };
+
+  const fetchChatMessages = async () => {
+    try {
+      const response = await api.get('/chat/messages');
+      setChatMessages(response.data);
+    } catch (error) {
+      console.error('Error fetching chat messages:', error);
+      setChatMessages([]);
+    }
+  };
+
+  const fetchSupportTickets = async () => {
+    try {
+      const response = await api.get('/support/tickets');
+      setSupportTickets(response.data);
+    } catch (error) {
+      console.error('Error fetching support tickets:', error);
+      setSupportTickets([]);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    e.preventDefault();
+    if (!uploadFile || !uploadDescription) return;
+
+    setUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      formData.append('description', uploadDescription);
+      
+      const response = await api.post('/documents/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      setDocuments([...documents, response.data]);
+      setShowUploadDialog(false);
+      setUploadFile(null);
+      setUploadDescription('');
+      alert('Dokumenti u ngarkua me sukses!');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Gabim në ngarkimin e dokumentit');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    setSendingMessage(true);
+    try {
+      const response = await api.post('/chat/send', {
+        message: newMessage,
+        timestamp: new Date().toISOString()
+      });
+      
+      setChatMessages([...chatMessages, response.data]);
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Gabim në dërgimin e mesazhit');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const handleSubmitTicket = async (e) => {
+    e.preventDefault();
+    if (!ticketSubject || !ticketDescription) return;
+
+    setSubmittingTicket(true);
+    try {
+      const response = await api.post('/support/tickets', {
+        subject: ticketSubject,
+        description: ticketDescription,
+        priority: ticketPriority
+      });
+      
+      setSupportTickets([...supportTickets, response.data]);
+      setShowTicketDialog(false);
+      setTicketSubject('');
+      setTicketDescription('');
+      setTicketPriority('medium');
+      alert('Ticket u krijua me sukses!');
+    } catch (error) {
+      console.error('Error submitting ticket:', error);
+      alert('Gabim në krijimin e ticket-it');
+    } finally {
+      setSubmittingTicket(false);
     }
   };
 
