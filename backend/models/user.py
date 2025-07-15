@@ -29,10 +29,16 @@ class User(BaseModel):
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
-    role: str
+    role: str  # "client", "consultant", or "admin"
     name: str
     phone: Optional[str] = None
     company: Optional[str] = None
+
+
+class UserApproval(BaseModel):
+    user_id: str
+    approved: bool  # True for approve, False for reject
+    reason: Optional[str] = None
 
 
 class UserUpdate(BaseModel):
