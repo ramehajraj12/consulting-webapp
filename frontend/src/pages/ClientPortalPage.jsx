@@ -275,10 +275,11 @@ const ClientPortalPage = () => {
       <section className="py-8">
         <div className="container mx-auto px-4">
           <Tabs defaultValue="dashboard" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="projects">Projektet</TabsTrigger>
               <TabsTrigger value="consultations">Konsultime</TabsTrigger>
+              <TabsTrigger value="documents">Dokumentet</TabsTrigger>
               <TabsTrigger value="notifications">Njoftimet</TabsTrigger>
               <TabsTrigger value="support">Mbështetje</TabsTrigger>
             </TabsList>
