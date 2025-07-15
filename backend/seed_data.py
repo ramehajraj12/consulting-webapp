@@ -424,6 +424,7 @@ async def main():
     
     print("✅ Database seeding completed successfully!")
     print("\nTest accounts created:")
+    print("Admin: admin@spssacademy.com / password123")
     print("Consultant: alba.hasani@spssacademy.al / password123")
     print("Client: fatmir.leshi@qsut.al / password123")
     
