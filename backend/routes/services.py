@@ -35,10 +35,10 @@ async def create_service(
     service_data: ServiceCreate,
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role != "consultant":
+    if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only consultants can create services"
+            detail="Vetëm administratorët mund të krijojnë shërbime të reja"
         )
     
     service = Service(**service_data.dict())
