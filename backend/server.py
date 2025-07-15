@@ -36,6 +36,7 @@ api_router.include_router(documents.router)
 api_router.include_router(chat.router)
 api_router.include_router(support.router)
 api_router.include_router(blog.router)
+api_router.include_router(payments.router)
 
 # Health check endpoint
 @api_router.get("/")
