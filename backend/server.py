@@ -32,6 +32,7 @@ api_router.include_router(auth.router)
 api_router.include_router(services.router)
 api_router.include_router(consultations.router)
 api_router.include_router(projects.router)
+api_router.include_router(dashboard.router)
 
 # Health check endpoint
 @api_router.get("/")
