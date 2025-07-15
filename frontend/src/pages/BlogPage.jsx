@@ -376,18 +376,8 @@ const BlogPage = () => {
     </div>
   );
 };
-      category: "Tutorial",
-      readTime: "10 min"
-    },
-    {
-      id: 4,
-      title: "SPSS vs R: Cili është më i mirë për ju?",
-      excerpt: "Krahasim i detajuar mes SPSS dhe R për analiza statistikore.",
-      author: "Dr. Alba Hasani",
-      date: "2024-01-08",
-      category: "Comparison",
-      readTime: "12 min"
-    },
+
+export default BlogPage;
     {
       id: 5,
       title: "Përgatitja e të Dhënave për Analizë",
