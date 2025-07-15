@@ -186,7 +186,7 @@ const Layout = ({ children }) => {
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center">
             <p className="body-small text-gray-400">
-              © 2024 SPSS Analytics. Të gjitha të drejtat e rezervuara.
+              © 2024 SPSS Academy. Të gjitha të drejtat e rezervuara.
             </p>
           </div>
         </div>
