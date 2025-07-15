@@ -234,17 +234,17 @@ Përdoruesi kërkoi implementimin e një sistemi admin për SPSS Academy me kët
           agent: "main"
           comment: "Përditësuar AuthContext për të mbështetur rolin admin dhe redirect në dashboard"
 
-  - task: "Modifikimi i Layout për admin navigation"
+  - task: "Rregullimi i environment variables në AdminDashboard"
     implemented: true
     working: true
-    file: "frontend/src/components/Layout.jsx"
+    file: "frontend/src/components/dashboard/AdminDashboard.jsx"
     stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
+    priority: "high"
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
-          comment: "Përditësuar getDashboardLink function për të mbështetur admin dashboard"
+          comment: "Rregulluar environment variable order për të përdorur REACT_APP_BACKEND_URL si prioritet"
 
   - task: "Përmirësimi i TrainingManagementPage"
     implemented: true
