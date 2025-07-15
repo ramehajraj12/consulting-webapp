@@ -101,6 +101,20 @@ async def login(credentials: dict):
             detail="Email ose fjalëkalim i gabuar"
         )
     
+    # Check if user is approved
+    if not user.is_approved:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Llogaria juaj është në pritje të aprovimit nga administratori."
+        )
+    
+    # Check if user is active
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Llogaria juaj është çaktivizuar."
+        )
+    
     # Create access token
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
