@@ -15,22 +15,38 @@ import {
   Facebook,
   Twitter,
   Linkedin,
-  Instagram
+  Instagram,
+  LogOut,
+  User
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Layout = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const location = useLocation();
+  const { user, logout } = useAuth();
 
-  const navItems = [
+  const publicNavItems = [
     { path: '/', label: 'Ballina', icon: null },
     { path: '/services', label: 'Shërbimet', icon: null },
     { path: '/training', label: 'Trajnimet', icon: null },
-    { path: '/consultation', label: 'Konsultime', icon: null },
     { path: '/blog', label: 'Blog', icon: null },
-    { path: '/client-portal', label: 'Portali', icon: null },
     { path: '/contact', label: 'Kontakt', icon: null }
   ];
+
+  const authNavItems = [
+    { path: '/consultation', label: 'Konsultime', icon: null },
+    { path: '/client-portal', label: 'Portali', icon: null },
+  ];
+
+  const getDashboardLink = () => {
+    if (user?.role === 'client') {
+      return '/client-dashboard';
+    } else if (user?.role === 'consultant') {
+      return '/consultant-dashboard';
+    }
+    return '/';
+  };
 
   const isActive = (path) => location.pathname === path;
 
@@ -50,7 +66,19 @@ const Layout = ({ children }) => {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              {navItems.map((item) => (
+              {publicNavItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`nav-link ${
+                    isActive(item.path) ? 'text-blue-600' : 'text-gray-700'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              
+              {user && authNavItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -63,13 +91,31 @@ const Layout = ({ children }) => {
               ))}
             </nav>
 
-            {/* CTA Button */}
+            {/* User Actions */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link to="/consultation">
-                <Button className="btn-primary">
-                  Rezervo Konsultim
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <Link to={getDashboardLink()}>
+                    <Button variant="outline" className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>{user.name}</span>
+                    </Button>
+                  </Link>
+                  <Button variant="outline" onClick={logout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Dil
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button variant="outline">Identifikohu</Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button className="btn-primary">Regjistrohuni</Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -90,7 +136,7 @@ const Layout = ({ children }) => {
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-200">
             <nav className="px-4 py-4 space-y-2">
-              {navItems.map((item) => (
+              {publicNavItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -104,12 +150,50 @@ const Layout = ({ children }) => {
                   {item.label}
                 </Link>
               ))}
-              <div className="pt-4">
-                <Link to="/consultation">
-                  <Button className="btn-primary w-full">
-                    Rezervo Konsultim
-                  </Button>
+              
+              {user && authNavItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`block py-2 px-3 rounded-md transition-colors ${
+                    isActive(item.path)
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
                 </Link>
+              ))}
+              
+              <div className="pt-4 border-t border-gray-200">
+                {user ? (
+                  <>
+                    <Link to={getDashboardLink()}>
+                      <Button variant="outline" className="w-full mb-2">
+                        <User className="h-4 w-4 mr-2" />
+                        {user.name}
+                      </Button>
+                    </Link>
+                    <Button variant="outline" onClick={logout} className="w-full">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Dil
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login">
+                      <Button variant="outline" className="w-full mb-2">
+                        Identifikohu
+                      </Button>
+                    </Link>
+                    <Link to="/register">
+                      <Button className="w-full btn-primary">
+                        Regjistrohuni
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </div>
@@ -174,7 +258,7 @@ const Layout = ({ children }) => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4 text-gray-400" />
-                  <span className="body-small text-gray-300">info@spssanalytics.al</span>
+                  <span className="body-small text-gray-300">info@spssacademy.al</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <MapPin className="h-4 w-4 text-gray-400" />
