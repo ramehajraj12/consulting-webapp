@@ -7,9 +7,13 @@ import {
   Calculator, 
   TrendingUp,
   Download,
-  RefreshCw
+  RefreshCw,
+  Activity,
+  Zap
 } from 'lucide-react';
 import axios from 'axios';
+import AdvancedAnalysis from './AdvancedAnalysis';
+import AnalysisResults from './AnalysisResults';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -20,6 +24,7 @@ const DatasetViewer = ({ dataset, onBack }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [runningAnalysis, setRunningAnalysis] = useState(null);
+  const [selectedAnalysisResult, setSelectedAnalysisResult] = useState(null);
 
   useEffect(() => {
     fetchDatasetPreview();
@@ -64,6 +69,12 @@ const DatasetViewer = ({ dataset, onBack }) => {
     }
   };
 
+  const handleAdvancedAnalysisComplete = (result) => {
+    setAnalyses(prev => [result, ...prev]);
+    setSelectedAnalysisResult(result);
+    setActiveTab('analyses');
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -77,7 +88,7 @@ const DatasetViewer = ({ dataset, onBack }) => {
   const renderOverview = () => (
     <div className="space-y-6">
       {/* Dataset Info */}
-      <div className="bg-gray-50 rounded-lg p-6">
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Dataset Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="text-center">
@@ -103,10 +114,10 @@ const DatasetViewer = ({ dataset, onBack }) => {
 
       {/* Column Information */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Columns</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Column Analysis</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Object.entries(dataset.column_info).map(([colName, colInfo]) => (
-            <div key={colName} className="border border-gray-200 rounded-lg p-4">
+            <div key={colName} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-gray-800">{colName}</h4>
                 <span className={`px-2 py-1 text-xs rounded-full ${
@@ -120,13 +131,22 @@ const DatasetViewer = ({ dataset, onBack }) => {
                 </span>
               </div>
               <div className="text-sm text-gray-600 space-y-1">
-                <div>Unique: {colInfo.unique_count}</div>
-                <div>Missing: {colInfo.null_count}</div>
+                <div className="flex justify-between">
+                  <span>Unique:</span>
+                  <span>{colInfo.unique_count}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Missing:</span>
+                  <span>{colInfo.null_count}</span>
+                </div>
                 {colInfo.sample_values && colInfo.sample_values.length > 0 && (
                   <div>
-                    Sample: {colInfo.sample_values.slice(0, 3).map(v => 
-                      v === null ? 'null' : String(v)
-                    ).join(', ')}
+                    <span className="text-gray-500">Sample:</span>
+                    <div className="mt-1 text-xs">
+                      {colInfo.sample_values.slice(0, 3).map(v => 
+                        v === null ? 'null' : String(v)
+                      ).join(', ')}
+                    </div>
                   </div>
                 )}
               </div>
@@ -182,6 +202,25 @@ const DatasetViewer = ({ dataset, onBack }) => {
           </button>
         </div>
       </div>
+
+      {/* Advanced Analysis Teaser */}
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6 border border-indigo-200">
+        <div className="flex items-center mb-4">
+          <Zap className="w-6 h-6 text-indigo-600 mr-2" />
+          <h3 className="text-lg font-semibold text-gray-800">Advanced Statistical Analysis</h3>
+        </div>
+        <p className="text-gray-600 mb-4">
+          Unlock the power of professional statistical analysis with t-tests, ANOVA, regression, 
+          chi-square tests, and advanced data visualization.
+        </p>
+        <button
+          onClick={() => setActiveTab('advanced')}
+          className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          <Activity className="w-5 h-5 mr-2" />
+          Launch Advanced Analysis
+        </button>
+      </div>
     </div>
   );
 
@@ -233,39 +272,65 @@ const DatasetViewer = ({ dataset, onBack }) => {
 
   const renderAnalyses = () => (
     <div className="space-y-6">
+      {selectedAnalysisResult && (
+        <AnalysisResults 
+          result={selectedAnalysisResult} 
+          onClose={() => setSelectedAnalysisResult(null)}
+        />
+      )}
+      
       {analyses.length === 0 ? (
         <div className="text-center py-12">
           <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-600 mb-2">No analyses yet</h3>
-          <p className="text-gray-500">Run your first analysis from the Overview tab</p>
+          <p className="text-gray-500">Run your first analysis from the Overview or Advanced tabs</p>
         </div>
       ) : (
-        analyses.map((analysis) => (
-          <div key={analysis.id} className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 capitalize">
-                {analysis.analysis_type} Analysis
-              </h3>
-              <div className="text-sm text-gray-500">
-                {formatDate(analysis.created_date)} • {analysis.execution_time.toFixed(2)}s
+        <div className="space-y-4">
+          {analyses.map((analysis) => (
+            <div key={analysis.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 capitalize flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
+                  {analysis.analysis_type.replace('_', ' ')} Analysis
+                </h3>
+                <div className="flex items-center space-x-4">
+                  <div className="text-sm text-gray-500">
+                    {formatDate(analysis.created_date)} • {analysis.execution_time.toFixed(2)}s
+                  </div>
+                  <button
+                    onClick={() => setSelectedAnalysisResult(analysis)}
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4">
+                <pre className="text-sm text-gray-700 overflow-x-auto whitespace-pre-wrap">
+                  {JSON.stringify(analysis.results, null, 2)}
+                </pre>
               </div>
             </div>
-            
-            <div className="bg-gray-50 rounded-lg p-4">
-              <pre className="text-sm text-gray-700 overflow-x-auto whitespace-pre-wrap">
-                {JSON.stringify(analysis.results, null, 2)}
-              </pre>
-            </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
+  );
+
+  const renderAdvancedAnalysis = () => (
+    <AdvancedAnalysis 
+      dataset={dataset} 
+      onAnalysisComplete={handleAdvancedAnalysisComplete}
+    />
   );
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Database },
     { id: 'data', label: 'Data Preview', icon: Table },
-    { id: 'analyses', label: 'Analyses', icon: BarChart3 }
+    { id: 'advanced', label: 'Advanced Analysis', icon: Activity },
+    { id: 'analyses', label: 'Results', icon: BarChart3 }
   ];
 
   return (
@@ -320,6 +385,7 @@ const DatasetViewer = ({ dataset, onBack }) => {
       <div className="p-6">
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'data' && renderDataPreview()}
+        {activeTab === 'advanced' && renderAdvancedAnalysis()}
         {activeTab === 'analyses' && renderAnalyses()}
       </div>
     </div>
