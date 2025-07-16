@@ -118,6 +118,30 @@ class AnalysisRequest(BaseModel):
     parameters: Dict[str, Any]
 
 # ===============================
+# ADDITIONAL DATASET MODELS
+# ===============================
+
+class DatasetCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tags: List[str] = []
+
+class ColumnInfo(BaseModel):
+    name: str
+    data_type: str
+    null_count: int
+    unique_count: int
+    sample_values: List[Any]
+    statistics: Optional[Dict[str, Any]] = None
+
+class DataPreview(BaseModel):
+    dataset_id: str
+    columns: List[str]
+    data: List[Dict[str, Any]]
+    total_rows: int
+    preview_rows: int
+
+# ===============================
 # ADMIN MODELS
 # ===============================
 
