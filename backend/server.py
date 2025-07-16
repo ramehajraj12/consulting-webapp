@@ -40,8 +40,12 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Initialize AI Assistant
-ai_assistant = StatisticalAIAssistant()
+# Initialize AI Assistant (with fallback if no API key)
+try:
+    ai_assistant = StatisticalAIAssistant()
+except ValueError as e:
+    print(f"Warning: {e}")
+    ai_assistant = None
 
 # Create the main app
 app = FastAPI(
