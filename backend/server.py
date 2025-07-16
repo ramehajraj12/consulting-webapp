@@ -1,15 +1,15 @@
-from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Form, Depends, status
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any, Union
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import json
@@ -27,6 +27,11 @@ from sklearn.metrics import r2_score, mean_squared_error
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
+# Import custom modules
+from .models import *
+from .auth import *
+from .ai_assistant import StatisticalAIAssistant
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -35,11 +40,22 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
-app = FastAPI(title="SPSSAU - Statistical Analysis Platform", version="1.0.0")
+# Initialize AI Assistant
+ai_assistant = StatisticalAIAssistant()
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+# Create the main app
+app = FastAPI(
+    title="SPSSAU - Professional Statistical Analysis Platform", 
+    version="2.0.0",
+    description="Professional web-based statistical analysis platform with AI-powered recommendations"
+)
+
+# Create routers
+auth_router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+admin_router = APIRouter(prefix="/api/admin", tags=["Administration"])
+analysis_router = APIRouter(prefix="/api/analysis", tags=["Statistical Analysis"])
+dataset_router = APIRouter(prefix="/api/datasets", tags=["Dataset Management"])
+ai_router = APIRouter(prefix="/api/ai", tags=["AI Assistant"])
 
 # ===============================
 # DATA MODELS
