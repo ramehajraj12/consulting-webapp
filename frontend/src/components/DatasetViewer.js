@@ -42,7 +42,7 @@ const DatasetViewer = ({ dataset, onBack }) => {
 
   const fetchAnalyses = async () => {
     try {
-      const response = await axios.get(`${API}/datasets/${dataset.id}/analyses`);
+      const response = await axios.get(`${API}/analysis/results/${dataset.id}`);
       setAnalyses(response.data);
     } catch (error) {
       console.error('Error fetching analyses:', error);
