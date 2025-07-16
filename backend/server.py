@@ -40,9 +40,10 @@ db = client[os.environ['DB_NAME']]
 
 # Initialize AI Assistant (with fallback if no API key)
 try:
+    from ai_assistant import StatisticalAIAssistant
     ai_assistant = StatisticalAIAssistant()
-except ValueError as e:
-    print(f"Warning: {e}")
+except (ValueError, ImportError) as e:
+    print(f"Warning: AI Assistant not available - {e}")
     ai_assistant = None
 
 # Create the main app
