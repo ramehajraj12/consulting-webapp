@@ -212,7 +212,7 @@ const DatasetViewer = ({ dataset, onBack }) => {
         </div>
         <p className="text-gray-600 mb-4">
           Unlock the power of professional statistical analysis with t-tests, ANOVA, regression, 
-          chi-square tests, and advanced data visualization.
+          chi-square tests, and advanced data visualization with AI-powered recommendations.
         </p>
         <button
           onClick={() => setActiveTab('advanced')}
