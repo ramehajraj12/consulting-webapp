@@ -382,6 +382,14 @@ const DatasetViewer = ({ dataset, onBack }) => {
         {activeTab === 'advanced' && renderAdvancedAnalysis()}
         {activeTab === 'analyses' && renderAnalyses()}
       </div>
+
+      {/* Enhanced Analysis Results Modal */}
+      {selectedAnalysisResult && (
+        <EnhancedAnalysisResults 
+          result={selectedAnalysisResult}
+          onClose={() => setSelectedAnalysisResult(null)}
+        />
+      )}
     </div>
   );
 };
