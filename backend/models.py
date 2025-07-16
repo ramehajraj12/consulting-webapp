@@ -41,7 +41,7 @@ class UserCreate(BaseModel):
     username: str
     full_name: str
     password: str
-    role: UserRole = UserRole.USER
+    role: UserRole = UserRole.RESEARCHER
     organization: Optional[str] = None
     department: Optional[str] = None
 
