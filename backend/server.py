@@ -348,8 +348,142 @@ async def get_datasets(current_user: User = Depends(get_current_active_user)):
         raise HTTPException(status_code=500, detail=f"Error retrieving datasets: {str(e)}")
 
 # ===============================
-# UTILITY FUNCTIONS
+# ENHANCED ANALYSIS ENDPOINTS
 # ===============================
+
+@analysis_router.post("/analyze")
+async def analyze_dataset_endpoint(
+    request: AnalysisRequest,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Perform statistical analysis with AI recommendations"""
+    try:
+        import time
+        start_time = time.time()
+        
+        # Get dataset
+        dataset = await db.datasets.find_one({"id": request.dataset_id})
+        if not dataset:
+            raise HTTPException(status_code=404, detail="Dataset not found")
+        
+        # Check permissions
+        if dataset["user_id"] != current_user.id and current_user.role != UserRole.ADMIN:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        # Load dataset data
+        chunks = await db.dataset_chunks.find({"dataset_id": request.dataset_id}).sort("chunk_index", 1).to_list(None)
+        all_data = []
+        for chunk in chunks:
+            all_data.extend(chunk['data'])
+        
+        df = pd.DataFrame(all_data)
+        
+        # Perform analysis
+        results = await perform_statistical_analysis(request.analysis_type, request.parameters, df, dataset)
+        
+        # Generate APA table
+        apa_table = await ai_assistant.generate_apa_table(request.analysis_type, results)
+        
+        # Generate AI recommendations
+        ai_recommendations = await ai_assistant.generate_analysis_recommendations(
+            request.analysis_type, 
+            results, 
+            dataset,
+            {"user_role": current_user.role, "organization": current_user.organization}
+        )
+        
+        # Save analysis result
+        execution_time = time.time() - start_time
+        analysis_result = AnalysisResult(
+            dataset_id=request.dataset_id,
+            user_id=current_user.id,
+            analysis_type=request.analysis_type,
+            parameters=request.parameters,
+            results=results,
+            apa_table=apa_table,
+            ai_recommendations=ai_recommendations,
+            execution_time=execution_time
+        )
+        
+        await db.analyses.insert_one(json.loads(analysis_result.json()))
+        
+        return analysis_result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error performing analysis: {str(e)}")
+
+@analysis_router.get("/results/{dataset_id}")
+async def get_analysis_results(
+    dataset_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get analysis results for a dataset"""
+    try:
+        # Check dataset permissions
+        dataset = await db.datasets.find_one({"id": dataset_id})
+        if not dataset:
+            raise HTTPException(status_code=404, detail="Dataset not found")
+        
+        if dataset["user_id"] != current_user.id and current_user.role != UserRole.ADMIN:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        analyses = await db.analyses.find({"dataset_id": dataset_id}).to_list(1000)
+        return [AnalysisResult(**analysis) for analysis in analyses]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving analyses: {str(e)}")
+
+# ===============================
+# AI ASSISTANT ENDPOINTS
+# ===============================
+
+@ai_router.post("/chat")
+async def chat_with_ai(
+    request: ChatRequest,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Chat with AI assistant"""
+    try:
+        # Get user's datasets and analyses for context
+        datasets = await db.datasets.find({"user_id": current_user.id}).to_list(100)
+        analyses = await db.analyses.find({"user_id": current_user.id}).sort("created_date", -1).to_list(50)
+        
+        # Generate response
+        response = await ai_assistant.generate_study_recommendations(
+            datasets, 
+            analyses, 
+            {
+                "role": current_user.role,
+                "organization": current_user.organization,
+                "department": current_user.department
+            }
+        )
+        
+        # Save chat message
+        chat_message = ChatMessage(
+            session_id=request.session_id,
+            user_id=current_user.id,
+            message=request.message,
+            response=response
+        )
+        
+        await db.chat_messages.insert_one(json.loads(chat_message.json()))
+        
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in AI chat: {str(e)}")
+
+@ai_router.post("/explain/{concept}")
+async def explain_concept(
+    concept: str,
+    context: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Explain statistical concept"""
+    try:
+        explanation = await ai_assistant.explain_statistical_concept(concept, context)
+        return {"explanation": explanation}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error explaining concept: {str(e)}")
 
 def detect_data_type(series):
     """Detect the appropriate data type for a pandas Series"""
