@@ -32,3 +32,6 @@ matplotlib>=3.7.0
 plotly>=5.15.0
 statsmodels>=0.14.0
 pillow>=10.0.0
+emergentintegrations>=0.1.0
+bcrypt>=4.0.0
+python-jose[cryptography]>=3.3.0
