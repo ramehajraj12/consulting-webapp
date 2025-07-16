@@ -58,65 +58,294 @@ dataset_router = APIRouter(prefix="/api/datasets", tags=["Dataset Management"])
 ai_router = APIRouter(prefix="/api/ai", tags=["AI Assistant"])
 
 # ===============================
-# DATA MODELS
+# AUTHENTICATION ENDPOINTS
 # ===============================
 
-class DatasetInfo(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    filename: str
-    upload_date: datetime = Field(default_factory=datetime.utcnow)
-    file_size: int
-    file_type: str
-    rows: int
-    columns: int
-    column_info: Dict[str, Any]
-    description: Optional[str] = None
-    tags: List[str] = []
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
+@auth_router.post("/register", response_model=Dict[str, Any])
+async def register_user(user_create: UserCreate):
+    """Register a new user"""
+    try:
+        # Check if user already exists
+        existing_user = await db.users.find_one({"$or": [{"email": user_create.email}, {"username": user_create.username}]})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User already exists")
+        
+        # Hash password
+        hashed_password = get_password_hash(user_create.password)
+        
+        # Create user
+        user = User(
+            email=user_create.email,
+            username=user_create.username,
+            full_name=user_create.full_name,
+            role=user_create.role,
+            organization=user_create.organization,
+            department=user_create.department
+        )
+        
+        user_dict = json.loads(user.json())
+        user_dict["password"] = hashed_password
+        
+        await db.users.insert_one(user_dict)
+        
+        return {
+            "message": "User registered successfully",
+            "user": user.dict()
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-class DatasetCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    tags: List[str] = []
-
-class ColumnInfo(BaseModel):
-    name: str
-    data_type: str
-    null_count: int
-    unique_count: int
-    sample_values: List[Any]
-    statistics: Optional[Dict[str, Any]] = None
-
-class DataPreview(BaseModel):
-    dataset_id: str
-    columns: List[str]
-    data: List[Dict[str, Any]]
-    total_rows: int
-    preview_rows: int
-
-class AnalysisRequest(BaseModel):
-    dataset_id: str
-    analysis_type: str
-    parameters: Dict[str, Any]
-
-class AnalysisResult(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    dataset_id: str
-    analysis_type: str
-    parameters: Dict[str, Any]
-    results: Dict[str, Any]
-    created_date: datetime = Field(default_factory=datetime.utcnow)
-    execution_time: float
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
+@auth_router.post("/login")
+async def login(user_login: UserLogin):
+    """User login"""
+    try:
+        # Find user
+        user_data = await db.users.find_one({"username": user_login.username})
+        if not user_data:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Verify password
+        if not verify_password(user_login.password, user_data["password"]):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Check if user is active
+        if user_data["status"] != "active":
+            raise HTTPException(status_code=401, detail="Account inactive")
+        
+        # Update last login
+        await db.users.update_one(
+            {"_id": user_data["_id"]},
+            {"$set": {"last_login": datetime.utcnow()}}
+        )
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user_data["username"]}, 
+            expires_delta=access_token_expires
+        )
+        
+        user = User(**user_data)
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": user.dict()
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@auth_router.get("/me", response_model=User)
+async def get_current_user_info(current_user: User = Depends(get_current_active_user)):
+    """Get current user information"""
+    return current_user
+
+@auth_router.put("/change-password")
+async def change_password(
+    password_reset: UserPasswordReset,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Change user password"""
+    try:
+        # Get user with password
+        user_data = await db.users.find_one({"id": current_user.id})
+        if not user_data:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Verify current password
+        if not verify_password(password_reset.current_password, user_data["password"]):
+            raise HTTPException(status_code=400, detail="Current password incorrect")
+        
+        # Update password
+        new_hashed_password = get_password_hash(password_reset.new_password)
+        await db.users.update_one(
+            {"id": current_user.id},
+            {"$set": {"password": new_hashed_password}}
+        )
+        
+        return {"message": "Password changed successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===============================
+# ADMIN ENDPOINTS
+# ===============================
+
+@admin_router.get("/dashboard")
+async def admin_dashboard(admin_user: User = Depends(get_admin_user)):
+    """Get admin dashboard statistics"""
+    try:
+        # Get system statistics
+        total_users = await db.users.count_documents({})
+        active_users = await db.users.count_documents({"status": "active"})
+        total_datasets = await db.datasets.count_documents({})
+        total_analyses = await db.analyses.count_documents({})
+        
+        # Get storage usage (approximate)
+        storage_used = await db.datasets.aggregate([
+            {"$group": {"_id": None, "total_size": {"$sum": "$file_size"}}}
+        ]).to_list(1)
+        storage_used = storage_used[0]["total_size"] if storage_used else 0
+        
+        # Get top analysis types
+        top_analysis_types = await db.analyses.aggregate([
+            {"$group": {"_id": "$analysis_type", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": 10}
+        ]).to_list(10)
+        
+        # Get recent user activity
+        user_activity = await db.users.aggregate([
+            {"$match": {"last_login": {"$exists": True}}},
+            {"$sort": {"last_login": -1}},
+            {"$limit": 10},
+            {"$project": {"username": 1, "full_name": 1, "last_login": 1, "organization": 1}}
+        ]).to_list(10)
+        
+        return SystemStats(
+            total_users=total_users,
+            active_users=active_users,
+            total_datasets=total_datasets,
+            total_analyses=total_analyses,
+            storage_used=storage_used,
+            top_analysis_types=top_analysis_types,
+            user_activity=user_activity
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@admin_router.get("/users")
+async def get_all_users(admin_user: User = Depends(get_admin_user)):
+    """Get all users (admin only)"""
+    try:
+        users = await db.users.find({}, {"password": 0}).to_list(1000)
+        return [User(**user) for user in users]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@admin_router.put("/users/{user_id}")
+async def update_user(
+    user_id: str,
+    user_update: UserUpdate,
+    admin_user: User = Depends(get_admin_user)
+):
+    """Update user (admin only)"""
+    try:
+        update_data = {k: v for k, v in user_update.dict().items() if v is not None}
+        if not update_data:
+            raise HTTPException(status_code=400, detail="No fields to update")
+        
+        result = await db.users.update_one(
+            {"id": user_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"message": "User updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@admin_router.delete("/users/{user_id}")
+async def delete_user(
+    user_id: str,
+    admin_user: User = Depends(get_admin_user)
+):
+    """Delete user (admin only)"""
+    try:
+        result = await db.users.delete_one({"id": user_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Also delete user's datasets and analyses
+        await db.datasets.delete_many({"user_id": user_id})
+        await db.analyses.delete_many({"user_id": user_id})
+        
+        return {"message": "User deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===============================
+# DATASET ENDPOINTS (Enhanced)
+# ===============================
+
+@dataset_router.post("/upload")
+async def upload_dataset(
+    file: UploadFile = File(...),
+    name: str = Form(...),
+    description: Optional[str] = Form(None),
+    tags: Optional[str] = Form(None),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Upload and process a dataset"""
+    try:
+        # Parse tags
+        tag_list = []
+        if tags:
+            tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()]
+        
+        # Read file content
+        file_content = await file.read()
+        file_size = len(file_content)
+        
+        # Determine file type and read data
+        filename = file.filename.lower()
+        
+        if filename.endswith('.csv'):
+            df = pd.read_csv(io.StringIO(file_content.decode('utf-8')))
+            file_type = 'csv'
+        elif filename.endswith(('.xlsx', '.xls')):
+            df = pd.read_excel(io.BytesIO(file_content))
+            file_type = 'excel'
+        elif filename.endswith('.json'):
+            data = json.loads(file_content.decode('utf-8'))
+            df = pd.DataFrame(data)
+            file_type = 'json'
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format. Please use CSV, Excel, or JSON.")
+        
+        # Analyze dataset
+        column_info = analyze_dataset(df)
+        
+        # Create dataset info
+        dataset_info = DatasetInfo(
+            name=name,
+            filename=file.filename,
+            file_size=file_size,
+            file_type=file_type,
+            rows=len(df),
+            columns=len(df.columns),
+            column_info=column_info,
+            description=description,
+            tags=tag_list,
+            user_id=current_user.id,
+            organization=current_user.organization
+        )
+        
+        # Save to database
+        await save_dataset_to_db(dataset_info, df)
+        
+        return JSONResponse(content={
+            "message": "Dataset uploaded successfully",
+            "dataset": json.loads(dataset_info.json())
+        })
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+
+@dataset_router.get("", response_model=List[DatasetInfo])
+async def get_datasets(current_user: User = Depends(get_current_active_user)):
+    """Get user's datasets"""
+    try:
+        query = {"user_id": current_user.id}
+        if current_user.role == UserRole.ADMIN:
+            query = {}  # Admin can see all datasets
+        
+        datasets = await db.datasets.find(query).to_list(1000)
+        return [DatasetInfo(**dataset) for dataset in datasets]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving datasets: {str(e)}")
 
 # ===============================
 # UTILITY FUNCTIONS
