@@ -435,6 +435,284 @@ class BackendTester:
         except Exception as e:
             print(f"Exception: {e}")
             return False
+
+    # ===============================
+    # ADVANCED STATISTICAL ANALYSIS TESTS
+    # ===============================
+    
+    def test_one_sample_ttest(self, dataset_id, column_name, test_value=0):
+        """Test one-sample t-test"""
+        print(f"\n=== Testing One-Sample T-Test {dataset_id} - Column: {column_name} ===")
+        try:
+            analysis_request = {
+                "dataset_id": dataset_id,
+                "analysis_type": "ttest_one",
+                "parameters": {
+                    "column": column_name,
+                    "test_value": test_value
+                }
+            }
+            
+            response = self.session.post(f"{API_URL}/datasets/{dataset_id}/analyze", 
+                                       json=analysis_request)
+            print(f"Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"Analysis ID: {result['id']}")
+                print(f"Execution time: {result['execution_time']:.3f} seconds")
+                
+                res = result['results']
+                print(f"Test type: {res['test_type']}")
+                print(f"Column: {res['column']}")
+                print(f"Test value: {res['test_value']}")
+                print(f"Sample mean: {res['sample_mean']:.4f}")
+                print(f"Sample std: {res['sample_std']:.4f}")
+                print(f"Sample size: {res['sample_size']}")
+                print(f"T-statistic: {res['t_statistic']:.4f}")
+                print(f"P-value: {res['p_value']:.6f}")
+                print(f"Degrees of freedom: {res['degrees_of_freedom']}")
+                print(f"Significant (p < 0.05): {res['significant']}")
+                
+                return True
+            else:
+                print(f"Error: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Exception: {e}")
+            return False
+    
+    def test_two_sample_ttest(self, dataset_id, column1, column2):
+        """Test two-sample t-test"""
+        print(f"\n=== Testing Two-Sample T-Test {dataset_id} - Columns: {column1} vs {column2} ===")
+        try:
+            analysis_request = {
+                "dataset_id": dataset_id,
+                "analysis_type": "ttest_two",
+                "parameters": {
+                    "column1": column1,
+                    "column2": column2
+                }
+            }
+            
+            response = self.session.post(f"{API_URL}/datasets/{dataset_id}/analyze", 
+                                       json=analysis_request)
+            print(f"Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"Analysis ID: {result['id']}")
+                print(f"Execution time: {result['execution_time']:.3f} seconds")
+                
+                res = result['results']
+                print(f"Test type: {res['test_type']}")
+                print(f"Column 1: {res['column1']} (mean: {res['group1_mean']:.4f}, std: {res['group1_std']:.4f}, n: {res['group1_size']})")
+                print(f"Column 2: {res['column2']} (mean: {res['group2_mean']:.4f}, std: {res['group2_std']:.4f}, n: {res['group2_size']})")
+                print(f"T-statistic: {res['t_statistic']:.4f}")
+                print(f"P-value: {res['p_value']:.6f}")
+                print(f"Degrees of freedom: {res['degrees_of_freedom']}")
+                print(f"Significant (p < 0.05): {res['significant']}")
+                
+                return True
+            else:
+                print(f"Error: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Exception: {e}")
+            return False
+    
+    def test_anova(self, dataset_id, dependent_var, independent_var):
+        """Test one-way ANOVA"""
+        print(f"\n=== Testing One-Way ANOVA {dataset_id} - {dependent_var} by {independent_var} ===")
+        try:
+            analysis_request = {
+                "dataset_id": dataset_id,
+                "analysis_type": "anova",
+                "parameters": {
+                    "dependent_var": dependent_var,
+                    "independent_var": independent_var
+                }
+            }
+            
+            response = self.session.post(f"{API_URL}/datasets/{dataset_id}/analyze", 
+                                       json=analysis_request)
+            print(f"Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"Analysis ID: {result['id']}")
+                print(f"Execution time: {result['execution_time']:.3f} seconds")
+                
+                res = result['results']
+                print(f"Test type: {res['test_type']}")
+                print(f"Dependent variable: {res['dependent_variable']}")
+                print(f"Independent variable: {res['independent_variable']}")
+                print(f"F-statistic: {res['f_statistic']:.4f}")
+                print(f"P-value: {res['p_value']:.6f}")
+                print(f"DF between: {res['degrees_of_freedom_between']}")
+                print(f"DF within: {res['degrees_of_freedom_within']}")
+                print(f"Significant (p < 0.05): {res['significant']}")
+                
+                print("Group statistics:")
+                for group in res['group_statistics']:
+                    print(f"  {group['group']}: mean={group['mean']:.4f}, std={group['std']:.4f}, n={group['count']}")
+                
+                return True
+            else:
+                print(f"Error: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Exception: {e}")
+            return False
+    
+    def test_chi_square(self, dataset_id, var1, var2):
+        """Test chi-square test of independence"""
+        print(f"\n=== Testing Chi-Square Test {dataset_id} - {var1} vs {var2} ===")
+        try:
+            analysis_request = {
+                "dataset_id": dataset_id,
+                "analysis_type": "chi_square",
+                "parameters": {
+                    "var1": var1,
+                    "var2": var2
+                }
+            }
+            
+            response = self.session.post(f"{API_URL}/datasets/{dataset_id}/analyze", 
+                                       json=analysis_request)
+            print(f"Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"Analysis ID: {result['id']}")
+                print(f"Execution time: {result['execution_time']:.3f} seconds")
+                
+                res = result['results']
+                print(f"Test type: {res['test_type']}")
+                print(f"Variable 1: {res['variable1']}")
+                print(f"Variable 2: {res['variable2']}")
+                print(f"Chi-square statistic: {res['chi2_statistic']:.4f}")
+                print(f"P-value: {res['p_value']:.6f}")
+                print(f"Degrees of freedom: {res['degrees_of_freedom']}")
+                print(f"Significant (p < 0.05): {res['significant']}")
+                
+                print("Contingency table:")
+                cont_table = res['contingency_table']
+                for row_key, row_data in cont_table.items():
+                    print(f"  {row_key}: {row_data}")
+                
+                return True
+            else:
+                print(f"Error: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Exception: {e}")
+            return False
+    
+    def test_linear_regression(self, dataset_id, dependent_var, independent_vars):
+        """Test linear regression"""
+        print(f"\n=== Testing Linear Regression {dataset_id} - {dependent_var} ~ {independent_vars} ===")
+        try:
+            analysis_request = {
+                "dataset_id": dataset_id,
+                "analysis_type": "regression",
+                "parameters": {
+                    "dependent_var": dependent_var,
+                    "independent_vars": independent_vars
+                }
+            }
+            
+            response = self.session.post(f"{API_URL}/datasets/{dataset_id}/analyze", 
+                                       json=analysis_request)
+            print(f"Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"Analysis ID: {result['id']}")
+                print(f"Execution time: {result['execution_time']:.3f} seconds")
+                
+                res = result['results']
+                print(f"Test type: {res['test_type']}")
+                print(f"Dependent variable: {res['dependent_variable']}")
+                print(f"Independent variables: {res['independent_variables']}")
+                print(f"R-squared: {res['r_squared']:.4f}")
+                print(f"Adjusted R-squared: {res['adjusted_r_squared']:.4f}")
+                print(f"F-statistic: {res['f_statistic']:.4f}")
+                print(f"F p-value: {res['f_pvalue']:.6f}")
+                print(f"RMSE: {res['rmse']:.4f}")
+                print(f"Sample size: {res['sample_size']}")
+                print(f"Significant (p < 0.05): {res['significant']}")
+                
+                print("Coefficients:")
+                print(f"  Intercept: {res['coefficients']['intercept']:.4f}")
+                for var, coef in res['coefficients']['slopes'].items():
+                    print(f"  {var}: {coef:.4f}")
+                
+                return True
+            else:
+                print(f"Error: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Exception: {e}")
+            return False
+    
+    def test_visualization(self, dataset_id, chart_type, columns):
+        """Test data visualization"""
+        print(f"\n=== Testing Visualization {dataset_id} - {chart_type} for {columns} ===")
+        try:
+            analysis_request = {
+                "dataset_id": dataset_id,
+                "analysis_type": "visualization",
+                "parameters": {
+                    "chart_type": chart_type,
+                    "columns": columns
+                }
+            }
+            
+            response = self.session.post(f"{API_URL}/datasets/{dataset_id}/analyze", 
+                                       json=analysis_request)
+            print(f"Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"Analysis ID: {result['id']}")
+                print(f"Execution time: {result['execution_time']:.3f} seconds")
+                
+                res = result['results']
+                print(f"Chart type: {res['chart_type']}")
+                print(f"Columns: {res['columns']}")
+                print(f"Image format: {res['image_format']}")
+                
+                # Check if base64 image data is present
+                if 'image_data' in res and res['image_data']:
+                    image_data_length = len(res['image_data'])
+                    print(f"✓ Base64 image data generated ({image_data_length} characters)")
+                    
+                    # Verify it's valid base64
+                    try:
+                        import base64
+                        base64.b64decode(res['image_data'])
+                        print("✓ Valid base64 encoding")
+                    except Exception:
+                        print("✗ Invalid base64 encoding")
+                        return False
+                else:
+                    print("✗ No image data generated")
+                    return False
+                
+                return True
+            else:
+                print(f"Error: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"Exception: {e}")
+            return False
     
     def run_comprehensive_test(self):
         """Run all backend tests"""
