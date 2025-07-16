@@ -67,7 +67,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     username = verify_token(token)
     
     # Import here to avoid circular imports
-    from .server import db
+    from server import db
     
     user_data = await db.users.find_one({"username": username})
     if user_data is None:
