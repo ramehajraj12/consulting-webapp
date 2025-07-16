@@ -18,6 +18,14 @@ import base64
 from scipy import stats
 import openpyxl
 import xlrd
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
