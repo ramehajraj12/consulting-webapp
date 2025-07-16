@@ -256,9 +256,9 @@ const AnalysisResults = ({ result }) => {
                         {formatNumber(results.coefficients.intercept)}
                       </div>
                     </div>
-                    {Object.entries(results.coefficients.slopes).map(([var, coef]) => (
-                      <div key={var} className="bg-white p-3 rounded border">
-                        <div className="font-medium text-gray-700">{var}</div>
+                    {Object.entries(results.coefficients.slopes).map(([variableName, coef]) => (
+                      <div key={variableName} className="bg-white p-3 rounded border">
+                        <div className="font-medium text-gray-700">{variableName}</div>
                         <div className="text-sm text-gray-600">
                           Coefficient: {formatNumber(coef)}
                         </div>
