@@ -386,15 +386,25 @@ async def analyze_dataset_endpoint(
         results = await perform_statistical_analysis(request.analysis_type, request.parameters, df, dataset)
         
         # Generate APA table
-        apa_table = await ai_assistant.generate_apa_table(request.analysis_type, results)
+        apa_table = None
+        if ai_assistant:
+            try:
+                apa_table = await ai_assistant.generate_apa_table(request.analysis_type, results)
+            except Exception as e:
+                print(f"Error generating APA table: {e}")
         
         # Generate AI recommendations
-        ai_recommendations = await ai_assistant.generate_analysis_recommendations(
-            request.analysis_type, 
-            results, 
-            dataset,
-            {"user_role": current_user.role, "organization": current_user.organization}
-        )
+        ai_recommendations = None
+        if ai_assistant:
+            try:
+                ai_recommendations = await ai_assistant.generate_analysis_recommendations(
+                    request.analysis_type, 
+                    results, 
+                    dataset,
+                    {"user_role": current_user.role, "organization": current_user.organization}
+                )
+            except Exception as e:
+                print(f"Error generating AI recommendations: {e}")
         
         # Save analysis result
         execution_time = time.time() - start_time
