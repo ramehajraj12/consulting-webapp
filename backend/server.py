@@ -173,8 +173,9 @@ def analyze_dataset(df):
 
 async def save_dataset_to_db(dataset_info: DatasetInfo, df: pd.DataFrame):
     """Save dataset info and data to MongoDB"""
-    # Save dataset info
-    await db.datasets.insert_one(dataset_info.dict())
+    # Save dataset info - convert to dict with proper datetime handling
+    dataset_dict = json.loads(dataset_info.json())
+    await db.datasets.insert_one(dataset_dict)
     
     # Save actual data in chunks to avoid document size limits
     chunk_size = 1000
