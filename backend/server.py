@@ -255,7 +255,7 @@ async def upload_dataset(
         
         return JSONResponse(content={
             "message": "Dataset uploaded successfully",
-            "dataset": dataset_info.dict()
+            "dataset": json.loads(dataset_info.json())
         })
         
     except Exception as e:
