@@ -715,7 +715,7 @@ class BackendTester:
             return False
     
     def run_comprehensive_test(self):
-        """Run all backend tests"""
+        """Run all backend tests including advanced statistical analysis"""
         print("=" * 60)
         print("SPSSAU Backend Comprehensive Testing")
         print("=" * 60)
@@ -741,6 +741,17 @@ class BackendTester:
             results['descriptive_analysis_csv'] = self.test_descriptive_analysis(csv_dataset_id)
             results['frequency_analysis_csv'] = self.test_frequency_analysis(csv_dataset_id, 'major')
             results['correlation_analysis_csv'] = self.test_correlation_analysis(csv_dataset_id)
+            
+            # Advanced analysis tests with CSV data
+            results['one_sample_ttest_csv'] = self.test_one_sample_ttest(csv_dataset_id, 'gpa', 3.5)
+            results['two_sample_ttest_csv'] = self.test_two_sample_ttest(csv_dataset_id, 'gpa', 'credits')
+            results['anova_csv'] = self.test_anova(csv_dataset_id, 'gpa', 'major')
+            results['chi_square_csv'] = self.test_chi_square(csv_dataset_id, 'gender', 'major')
+            results['regression_csv'] = self.test_linear_regression(csv_dataset_id, 'gpa', ['age', 'credits'])
+            results['visualization_histogram_csv'] = self.test_visualization(csv_dataset_id, 'histogram', ['gpa'])
+            results['visualization_boxplot_csv'] = self.test_visualization(csv_dataset_id, 'boxplot', ['age'])
+            results['visualization_scatter_csv'] = self.test_visualization(csv_dataset_id, 'scatter', ['gpa', 'credits'])
+            results['visualization_bar_csv'] = self.test_visualization(csv_dataset_id, 'bar', ['major'])
         
         # Test with Excel dataset (products data)
         if excel_dataset_id:
@@ -750,6 +761,17 @@ class BackendTester:
             results['descriptive_analysis_excel'] = self.test_descriptive_analysis(excel_dataset_id)
             results['frequency_analysis_excel'] = self.test_frequency_analysis(excel_dataset_id, 'category')
             results['correlation_analysis_excel'] = self.test_correlation_analysis(excel_dataset_id)
+            
+            # Advanced analysis tests with Excel data
+            results['one_sample_ttest_excel'] = self.test_one_sample_ttest(excel_dataset_id, 'price', 200)
+            results['two_sample_ttest_excel'] = self.test_two_sample_ttest(excel_dataset_id, 'price', 'rating')
+            results['anova_excel'] = self.test_anova(excel_dataset_id, 'price', 'category')
+            results['chi_square_excel'] = self.test_chi_square(excel_dataset_id, 'category', 'product_name')
+            results['regression_excel'] = self.test_linear_regression(excel_dataset_id, 'price', ['rating', 'stock_quantity'])
+            results['visualization_histogram_excel'] = self.test_visualization(excel_dataset_id, 'histogram', ['price'])
+            results['visualization_boxplot_excel'] = self.test_visualization(excel_dataset_id, 'boxplot', ['rating'])
+            results['visualization_scatter_excel'] = self.test_visualization(excel_dataset_id, 'scatter', ['price', 'rating'])
+            results['visualization_bar_excel'] = self.test_visualization(excel_dataset_id, 'bar', ['category'])
         
         # Test with JSON dataset (employees data)
         if json_dataset_id:
@@ -759,6 +781,17 @@ class BackendTester:
             results['descriptive_analysis_json'] = self.test_descriptive_analysis(json_dataset_id)
             results['frequency_analysis_json'] = self.test_frequency_analysis(json_dataset_id, 'department')
             results['correlation_analysis_json'] = self.test_correlation_analysis(json_dataset_id)
+            
+            # Advanced analysis tests with JSON data
+            results['one_sample_ttest_json'] = self.test_one_sample_ttest(json_dataset_id, 'salary', 70000)
+            results['two_sample_ttest_json'] = self.test_two_sample_ttest(json_dataset_id, 'salary', 'experience_years')
+            results['anova_json'] = self.test_anova(json_dataset_id, 'salary', 'department')
+            results['chi_square_json'] = self.test_chi_square(json_dataset_id, 'department', 'name')
+            results['regression_json'] = self.test_linear_regression(json_dataset_id, 'salary', ['experience_years'])
+            results['visualization_histogram_json'] = self.test_visualization(json_dataset_id, 'histogram', ['salary'])
+            results['visualization_boxplot_json'] = self.test_visualization(json_dataset_id, 'boxplot', ['experience_years'])
+            results['visualization_scatter_json'] = self.test_visualization(json_dataset_id, 'scatter', ['salary', 'experience_years'])
+            results['visualization_bar_json'] = self.test_visualization(json_dataset_id, 'bar', ['department'])
         
         # Test dataset deletion (clean up)
         for dataset_id in self.uploaded_datasets:
@@ -775,7 +808,7 @@ class BackendTester:
         
         for test_name, result in results.items():
             status = "✓ PASS" if result else "✗ FAIL"
-            print(f"{test_name:<35} {status}")
+            print(f"{test_name:<40} {status}")
             if result:
                 passed += 1
             else:
