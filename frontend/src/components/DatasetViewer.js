@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import AdvancedAnalysis from './AdvancedAnalysis';
-import AnalysisResults from './AnalysisResults';
+import EnhancedAnalysisResults from './EnhancedAnalysisResults';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
