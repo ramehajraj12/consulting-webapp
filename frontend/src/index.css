@@ -9,9 +9,77 @@ body {
         "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #f9fafb;
 }
 
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
         monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Animation for loading states */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Table styles */
+.table-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* Custom button styles */
+.btn-primary {
+    @apply px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors;
+}
+
+.btn-secondary {
+    @apply px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors;
+}
+
+/* Card styles */
+.card {
+    @apply bg-white rounded-lg shadow-lg border border-gray-200;
+}
+
+/* Data type badges */
+.badge-numeric {
+    @apply px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full;
+}
+
+.badge-categorical {
+    @apply px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full;
+}
+
+.badge-datetime {
+    @apply px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full;
 }
