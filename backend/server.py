@@ -49,6 +49,11 @@ class DatasetInfo(BaseModel):
     column_info: Dict[str, Any]
     description: Optional[str] = None
     tags: List[str] = []
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
 
 class DatasetCreate(BaseModel):
     name: str
