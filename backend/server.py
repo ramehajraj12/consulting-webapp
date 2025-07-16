@@ -88,6 +88,11 @@ class AnalysisResult(BaseModel):
     results: Dict[str, Any]
     created_date: datetime = Field(default_factory=datetime.utcnow)
     execution_time: float
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
 
 # ===============================
 # UTILITY FUNCTIONS
