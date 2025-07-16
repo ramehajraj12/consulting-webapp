@@ -27,10 +27,8 @@ from sklearn.metrics import r2_score, mean_squared_error
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
-# Import custom modules
 from models import *
 from auth import *
-from ai_assistant import StatisticalAIAssistant
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
