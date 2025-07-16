@@ -273,13 +273,6 @@ const DatasetViewer = ({ dataset, onBack }) => {
 
   const renderAnalyses = () => (
     <div className="space-y-6">
-      {selectedAnalysisResult && (
-        <AnalysisResults 
-          result={selectedAnalysisResult} 
-          onClose={() => setSelectedAnalysisResult(null)}
-        />
-      )}
-      
       {analyses.length === 0 ? (
         <div className="text-center py-12">
           <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -301,7 +294,7 @@ const DatasetViewer = ({ dataset, onBack }) => {
                   </div>
                   <button
                     onClick={() => setSelectedAnalysisResult(analysis)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                   >
                     View Details
                   </button>
