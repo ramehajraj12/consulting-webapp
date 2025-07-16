@@ -437,7 +437,7 @@ async def analyze_dataset_endpoint(dataset_id: str, request: AnalysisRequest):
             execution_time=execution_time
         )
         
-        await db.analyses.insert_one(analysis_result.dict())
+        await db.analyses.insert_one(json.loads(analysis_result.json()))
         
         return analysis_result
         
