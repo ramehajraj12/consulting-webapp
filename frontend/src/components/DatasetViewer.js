@@ -54,13 +54,14 @@ const DatasetViewer = ({ dataset, onBack }) => {
   const runAnalysis = async (analysisType, parameters = {}) => {
     try {
       setRunningAnalysis(analysisType);
-      const response = await axios.post(`${API}/datasets/${dataset.id}/analyze`, {
+      const response = await axios.post(`${API}/analysis/analyze`, {
         dataset_id: dataset.id,
         analysis_type: analysisType,
         parameters: parameters
       });
       
       setAnalyses(prev => [response.data, ...prev]);
+      setSelectedAnalysisResult(response.data);
       setActiveTab('analyses');
     } catch (error) {
       alert('Analysis failed: ' + (error.response?.data?.detail || error.message));
