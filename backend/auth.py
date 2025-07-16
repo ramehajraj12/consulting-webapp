@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from typing import Optional
 import os
-from .models import User, UserRole
+from models import User, UserRole
 
 # Security configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
