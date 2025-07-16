@@ -457,6 +457,9 @@ async def chat_with_ai(
 ):
     """Chat with AI assistant"""
     try:
+        if not ai_assistant:
+            raise HTTPException(status_code=503, detail="AI assistant not available. Please configure OpenAI API key.")
+        
         # Get user's datasets and analyses for context
         datasets = await db.datasets.find({"user_id": current_user.id}).to_list(100)
         analyses = await db.analyses.find({"user_id": current_user.id}).sort("created_date", -1).to_list(50)
@@ -494,6 +497,9 @@ async def explain_concept(
 ):
     """Explain statistical concept"""
     try:
+        if not ai_assistant:
+            raise HTTPException(status_code=503, detail="AI assistant not available. Please configure OpenAI API key.")
+        
         explanation = await ai_assistant.explain_statistical_concept(concept, context)
         return {"explanation": explanation}
     except Exception as e:
