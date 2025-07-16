@@ -249,12 +249,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Data Upload API"
-    - "Dataset Management API"
-    - "Statistical Analysis API"
     - "Data Upload Component"
     - "Dataset List Component"
     - "Dataset Viewer Component"
+    - "Main App Integration"
+    - "UI/UX Design"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
