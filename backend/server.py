@@ -424,6 +424,312 @@ async def analyze_dataset_endpoint(dataset_id: str, request: AnalysisRequest):
                             'correlation': corr_val
                         })
         
+        elif request.analysis_type == "ttest_one":
+            # One-sample t-test
+            column = request.parameters.get('column')
+            test_value = request.parameters.get('test_value', 0)
+            
+            if not column or column not in df.columns:
+                raise HTTPException(status_code=400, detail="Valid column parameter required")
+            
+            from scipy import stats
+            data = df[column].dropna()
+            
+            if len(data) < 2:
+                raise HTTPException(status_code=400, detail="Insufficient data for t-test")
+            
+            t_stat, p_value = stats.ttest_1samp(data, test_value)
+            
+            results = {
+                'test_type': 'One-sample t-test',
+                'column': column,
+                'test_value': test_value,
+                't_statistic': float(t_stat),
+                'p_value': float(p_value),
+                'degrees_of_freedom': len(data) - 1,
+                'sample_mean': float(data.mean()),
+                'sample_std': float(data.std()),
+                'sample_size': len(data),
+                'significant': p_value < 0.05
+            }
+            
+        elif request.analysis_type == "ttest_two":
+            # Two-sample t-test
+            column1 = request.parameters.get('column1')
+            column2 = request.parameters.get('column2')
+            
+            if not column1 or not column2 or column1 not in df.columns or column2 not in df.columns:
+                raise HTTPException(status_code=400, detail="Valid column1 and column2 parameters required")
+            
+            from scipy import stats
+            data1 = df[column1].dropna()
+            data2 = df[column2].dropna()
+            
+            if len(data1) < 2 or len(data2) < 2:
+                raise HTTPException(status_code=400, detail="Insufficient data for t-test")
+            
+            t_stat, p_value = stats.ttest_ind(data1, data2)
+            
+            results = {
+                'test_type': 'Two-sample t-test',
+                'column1': column1,
+                'column2': column2,
+                't_statistic': float(t_stat),
+                'p_value': float(p_value),
+                'degrees_of_freedom': len(data1) + len(data2) - 2,
+                'group1_mean': float(data1.mean()),
+                'group2_mean': float(data2.mean()),
+                'group1_std': float(data1.std()),
+                'group2_std': float(data2.std()),
+                'group1_size': len(data1),
+                'group2_size': len(data2),
+                'significant': p_value < 0.05
+            }
+            
+        elif request.analysis_type == "anova":
+            # One-way ANOVA
+            dependent_var = request.parameters.get('dependent_var')
+            independent_var = request.parameters.get('independent_var')
+            
+            if not dependent_var or not independent_var:
+                raise HTTPException(status_code=400, detail="dependent_var and independent_var parameters required")
+            
+            if dependent_var not in df.columns or independent_var not in df.columns:
+                raise HTTPException(status_code=400, detail="Specified columns not found in dataset")
+            
+            from scipy import stats
+            import statsmodels.api as sm
+            from statsmodels.formula.api import ols
+            
+            # Clean data
+            clean_df = df[[dependent_var, independent_var]].dropna()
+            
+            if len(clean_df) < 3:
+                raise HTTPException(status_code=400, detail="Insufficient data for ANOVA")
+            
+            # Group data by independent variable
+            groups = [group[dependent_var].values for name, group in clean_df.groupby(independent_var)]
+            
+            if len(groups) < 2:
+                raise HTTPException(status_code=400, detail="At least 2 groups required for ANOVA")
+            
+            # Perform ANOVA
+            f_stat, p_value = stats.f_oneway(*groups)
+            
+            # Calculate group statistics
+            group_stats = []
+            for name, group in clean_df.groupby(independent_var):
+                group_stats.append({
+                    'group': str(name),
+                    'mean': float(group[dependent_var].mean()),
+                    'std': float(group[dependent_var].std()),
+                    'count': len(group)
+                })
+            
+            results = {
+                'test_type': 'One-way ANOVA',
+                'dependent_variable': dependent_var,
+                'independent_variable': independent_var,
+                'f_statistic': float(f_stat),
+                'p_value': float(p_value),
+                'degrees_of_freedom_between': len(groups) - 1,
+                'degrees_of_freedom_within': len(clean_df) - len(groups),
+                'group_statistics': group_stats,
+                'significant': p_value < 0.05
+            }
+            
+        elif request.analysis_type == "chi_square":
+            # Chi-square test of independence
+            var1 = request.parameters.get('var1')
+            var2 = request.parameters.get('var2')
+            
+            if not var1 or not var2:
+                raise HTTPException(status_code=400, detail="var1 and var2 parameters required")
+            
+            if var1 not in df.columns or var2 not in df.columns:
+                raise HTTPException(status_code=400, detail="Specified columns not found in dataset")
+            
+            from scipy import stats
+            
+            # Create contingency table
+            contingency_table = pd.crosstab(df[var1], df[var2])
+            
+            if contingency_table.empty:
+                raise HTTPException(status_code=400, detail="Unable to create contingency table")
+            
+            # Perform chi-square test
+            chi2, p_value, dof, expected = stats.chi2_contingency(contingency_table)
+            
+            results = {
+                'test_type': 'Chi-square test of independence',
+                'variable1': var1,
+                'variable2': var2,
+                'chi2_statistic': float(chi2),
+                'p_value': float(p_value),
+                'degrees_of_freedom': int(dof),
+                'contingency_table': contingency_table.to_dict(),
+                'expected_frequencies': pd.DataFrame(expected, 
+                                                   index=contingency_table.index,
+                                                   columns=contingency_table.columns).to_dict(),
+                'significant': p_value < 0.05
+            }
+            
+        elif request.analysis_type == "regression":
+            # Linear regression
+            dependent_var = request.parameters.get('dependent_var')
+            independent_vars = request.parameters.get('independent_vars', [])
+            
+            if not dependent_var:
+                raise HTTPException(status_code=400, detail="dependent_var parameter required")
+            
+            if not independent_vars:
+                raise HTTPException(status_code=400, detail="independent_vars parameter required")
+            
+            if isinstance(independent_vars, str):
+                independent_vars = [independent_vars]
+            
+            from sklearn.linear_model import LinearRegression
+            from sklearn.metrics import r2_score, mean_squared_error
+            import statsmodels.api as sm
+            
+            # Check if all variables exist
+            all_vars = [dependent_var] + independent_vars
+            missing_vars = [var for var in all_vars if var not in df.columns]
+            if missing_vars:
+                raise HTTPException(status_code=400, detail=f"Variables not found: {missing_vars}")
+            
+            # Clean data
+            clean_df = df[all_vars].dropna()
+            
+            if len(clean_df) < len(independent_vars) + 2:
+                raise HTTPException(status_code=400, detail="Insufficient data for regression")
+            
+            X = clean_df[independent_vars]
+            y = clean_df[dependent_var]
+            
+            # Fit regression model
+            model = LinearRegression()
+            model.fit(X, y)
+            
+            # Get predictions
+            y_pred = model.predict(X)
+            
+            # Calculate statistics
+            r2 = r2_score(y, y_pred)
+            mse = mean_squared_error(y, y_pred)
+            
+            # Use statsmodels for more detailed statistics
+            X_sm = sm.add_constant(X)
+            sm_model = sm.OLS(y, X_sm).fit()
+            
+            results = {
+                'test_type': 'Linear Regression',
+                'dependent_variable': dependent_var,
+                'independent_variables': independent_vars,
+                'r_squared': float(r2),
+                'adjusted_r_squared': float(sm_model.rsquared_adj),
+                'f_statistic': float(sm_model.fvalue),
+                'f_pvalue': float(sm_model.f_pvalue),
+                'mse': float(mse),
+                'rmse': float(np.sqrt(mse)),
+                'coefficients': {
+                    'intercept': float(model.intercept_),
+                    'slopes': {var: float(coef) for var, coef in zip(independent_vars, model.coef_)}
+                },
+                'coefficient_stats': {
+                    'coefficients': sm_model.params.to_dict(),
+                    'std_errors': sm_model.bse.to_dict(),
+                    't_values': sm_model.tvalues.to_dict(),
+                    'p_values': sm_model.pvalues.to_dict()
+                },
+                'sample_size': len(clean_df),
+                'significant': sm_model.f_pvalue < 0.05
+            }
+            
+        elif request.analysis_type == "visualization":
+            # Generate visualization
+            chart_type = request.parameters.get('chart_type', 'histogram')
+            columns = request.parameters.get('columns', [])
+            
+            if not columns:
+                raise HTTPException(status_code=400, detail="columns parameter required")
+            
+            import matplotlib.pyplot as plt
+            import seaborn as sns
+            import base64
+            from io import BytesIO
+            
+            # Set style
+            plt.style.use('default')
+            sns.set_palette("husl")
+            
+            fig, ax = plt.subplots(figsize=(10, 6))
+            
+            if chart_type == 'histogram':
+                column = columns[0] if columns else df.columns[0]
+                if column not in df.columns:
+                    raise HTTPException(status_code=400, detail=f"Column '{column}' not found")
+                
+                data = df[column].dropna()
+                ax.hist(data, bins=30, alpha=0.7, edgecolor='black')
+                ax.set_title(f'Histogram of {column}')
+                ax.set_xlabel(column)
+                ax.set_ylabel('Frequency')
+                
+            elif chart_type == 'boxplot':
+                column = columns[0] if columns else df.columns[0]
+                if column not in df.columns:
+                    raise HTTPException(status_code=400, detail=f"Column '{column}' not found")
+                
+                data = df[column].dropna()
+                ax.boxplot(data)
+                ax.set_title(f'Boxplot of {column}')
+                ax.set_ylabel(column)
+                
+            elif chart_type == 'scatter':
+                if len(columns) < 2:
+                    raise HTTPException(status_code=400, detail="Two columns required for scatter plot")
+                
+                x_col, y_col = columns[0], columns[1]
+                if x_col not in df.columns or y_col not in df.columns:
+                    raise HTTPException(status_code=400, detail="Specified columns not found")
+                
+                clean_df = df[[x_col, y_col]].dropna()
+                ax.scatter(clean_df[x_col], clean_df[y_col], alpha=0.6)
+                ax.set_title(f'Scatter Plot: {x_col} vs {y_col}')
+                ax.set_xlabel(x_col)
+                ax.set_ylabel(y_col)
+                
+            elif chart_type == 'bar':
+                column = columns[0] if columns else df.columns[0]
+                if column not in df.columns:
+                    raise HTTPException(status_code=400, detail=f"Column '{column}' not found")
+                
+                value_counts = df[column].value_counts().head(10)
+                ax.bar(range(len(value_counts)), value_counts.values)
+                ax.set_title(f'Bar Chart of {column}')
+                ax.set_xlabel(column)
+                ax.set_ylabel('Count')
+                ax.set_xticks(range(len(value_counts)))
+                ax.set_xticklabels(value_counts.index, rotation=45)
+                
+            # Convert plot to base64 string
+            buffer = BytesIO()
+            plt.tight_layout()
+            plt.savefig(buffer, format='png', dpi=100, bbox_inches='tight')
+            buffer.seek(0)
+            
+            # Encode to base64
+            plot_data = base64.b64encode(buffer.getvalue()).decode()
+            plt.close()
+            
+            results = {
+                'chart_type': chart_type,
+                'columns': columns,
+                'image_data': plot_data,
+                'image_format': 'png'
+            }
+        
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported analysis type: {request.analysis_type}")
         
