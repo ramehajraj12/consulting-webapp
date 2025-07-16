@@ -24,7 +24,7 @@ class User(BaseModel):
     email: EmailStr
     username: str
     full_name: str
-    role: UserRole = UserRole.USER
+    role: UserRole = UserRole.RESEARCHER
     status: UserStatus = UserStatus.ACTIVE
     created_date: datetime = Field(default_factory=datetime.utcnow)
     last_login: Optional[datetime] = None
