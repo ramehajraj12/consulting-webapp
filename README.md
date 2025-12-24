@@ -29,8 +29,25 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## SPSS TALK (document-aware chat)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Environment variables
+- `OPENAI_API_KEY` (required) – set this locally in `.env.local` and in Vercel Project Settings → Environment Variables.
+- `OPENAI_MODEL` (optional) – defaults to `gpt-4.1-mini`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Run locally
+1. Install dependencies: `npm install`
+2. Start the dev server: `npm run dev`
+3. Open http://localhost:3000
+
+### Quick API test
+```bash
+curl -X POST http://localhost:3000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Hello"}],"documentContext":{"enabled":false,"docName":"","docType":"","text":""}}'
+```
+
+### Deploy to Vercel
+1. Add `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`) in Vercel → Project Settings → Environment Variables.
+2. Redeploy the project so the API picks up the keys.
+3. The frontend uses a relative `/api/chat` call so it works on both localhost and Vercel.
